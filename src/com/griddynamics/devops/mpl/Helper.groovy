@@ -64,15 +64,14 @@ abstract class Helper {
   static List getModulesList(String path) {
     def executable = CpsThread.current()?.getExecution()?.getOwner()?.getExecutable()
     if( ! (executable instanceof Run) )
-      throw new MPLException('Current executable is not jenkins Run')
+      throw new MPLException('Current executable is not a jenkins Run')
 
-    def run = (Run) executable
-    def action = run.getAction(LibrariesAction.class)
+    def action = executable.getAction(LibrariesAction.class)
     if( action == null )
       throw new MPLException('Unable to find LibrariesAction in the current Run')
 
     def modules = []
-    def libs = new FilePath(run.getRootDir()).child('libs')
+    def libs = new FilePath(executable.getRootDir()).child('libs')
     action.getLibraries().each { lib ->
       def f = libs.child(lib.name + '/resources/' + path)
       if( f.exists() ) modules += [[lib.name, f.readToString()]]
