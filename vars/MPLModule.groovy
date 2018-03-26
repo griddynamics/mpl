@@ -37,7 +37,8 @@ import com.griddynamics.devops.mpl.MPLModuleException
  * @param cfg   module configuration to override. Will update the common module configuration
  */
 def call(String name = env.STAGE_NAME, Map cfg = null) {
-  cfg = Helper.mergeMaps(MPLManager.instance.moduleConfig(name), cfg)
+  if( cfg == null )
+    cfg = MPLManager.instance.moduleConfig(name)
   
   // Trace of the running modules to find loops
   // Also to make ability to use lib module from overridden one
@@ -67,7 +68,7 @@ def call(String name = env.STAGE_NAME, Map cfg = null) {
     throw new MPLModuleException("Unable to find the not active module to execute: ${(active_modules).join(' --> ')} -X> ${module_path}")
 
   try {
-    Helper.runModule(module_src, module_path, [CFG: cfg])
+    Helper.runModule(module_src, module_path, [CFG: Helper.flatten(cfg)])
   }
   catch( ex ) {
     def newex = new MPLModuleException("Found error during execution of the module '${module_path}':\n${ex}")

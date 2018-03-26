@@ -82,7 +82,7 @@ If your project is special - you can override or provide aditional modules just 
 
 What do you need to do:
 1. Create a step file: `{ProjectRepo}/jenkins/modules/{Stage}/{Name}{Stage}.groovy` (name could be empty)
-2. Fill the step with your required logic: you can use CFG variable & MPL functions inside the steps definition
+2. Fill the step with your required logic: you can use CFG flatten map variable & MPL functions inside the steps definition
 3. Use this step in your custom pipeline (or, if it's override, in standard pipeline) via MPLModule method.
 4. Provided custom modules will be available to use after the checkout of your project source only
 

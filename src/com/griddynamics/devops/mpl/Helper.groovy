@@ -95,6 +95,19 @@ abstract class Helper {
   }
 
   /**
+   * Converts map to a simply flatten map
+   *
+   * @param data       map to flatten
+   * @param separator  keys separator
+   * @return  map with flatten keys
+   */
+  static Map flatten(Map data, String separator = '.') {
+    data.collectEntries { k, v ->
+      v instanceof Map ? flatten(v, separator).collectEntries { q, r -> [(k + separator + q): r] } : [(k):v]
+    }
+  }
+
+  /**
    * Helps to run source code in the new shell with predefined vars
    * Also it's overriden by tests to handle the module execution
    *
