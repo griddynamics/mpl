@@ -47,7 +47,7 @@ def call(String name = env.STAGE_NAME, Map cfg = null) {
   // Determining the module source file and location
   def base = (cfg.name ?: name).tokenize()
   def module_path = "modules/${base.last()}/${base.join()}.groovy"
-  def project_path = "jenkins/${module_path}".toString()
+  def project_path = ".jenkins/${module_path}".toString()
 
   // Reading module definition from workspace or from the library resources
   def module_src = null
@@ -56,16 +56,14 @@ def call(String name = env.STAGE_NAME, Map cfg = null) {
     module_src = readFile(project_path)
   } else {
     // Searching for the not executed module from the loaded libraries
-    // TODO: add ability to add other library paths to search
-    def library_path = "com/griddynamics/devops/mpl/${module_path}".toString()
-    module_src = Helper.getModulesList(library_path).find { it ->
-      module_path = "library:${it.first()}:${library_path}".toString()
+    module_src = Helper.getModulesList(module_path).find { it ->
+      module_path = "library:${it.first()}".toString()
       ! active_modules.contains(module_path)
     }?.last()
   }
 
   if( ! module_src )
-    throw new MPLModuleException("Unable to find the not active module to execute: ${(active_modules).join(' --> ')} -X> ${module_path}")
+    throw new MPLModuleException("Unable to find not active module to execute: ${(active_modules).join(' --> ')} -X> ${module_path}")
 
   try {
     Helper.runModule(module_src, module_path, [CFG: Helper.flatten(cfg)])

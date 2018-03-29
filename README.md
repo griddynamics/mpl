@@ -67,9 +67,10 @@ MPL is mostly modules with logic. Basic features:
 * Could be used in declarative & scripted pipelines
 * Override system with loop protection and simple nesting
 
-In fact modules could be loaded from 2 places:
-* `{ProjectRepo}/jenkins/modules/{Stage}/{Name}{Stage}.groovy` - custom modules for the project
-* `{MPL}/resources/com/griddynamics/devops/mpl/modules/{Stage}/{Name}{Stage}.groovy` - library modules for everyone
+In fact modules could be loaded from a number of places:
+* `{ProjectRepo}/.jenkins/modules/{Stage}/{Name}{Stage}.groovy` - custom modules for the project
+* `{Library}/{SpecifiedModulesLoadPath}/modules/{Stage}/{Name}{Stage}.groovy` - custom modules load path that added while init
+* `{Library}/resources/com/griddynamics/devops/mpl/modules/{Stage}/{Name}{Stage}.groovy` - library modules for everyone
 
 If you will override module Build in your project repo, it will be used first.
 If you will try to require Build module from this overridden Build module - original library module will be used.
@@ -81,7 +82,7 @@ Check the usage examples & library modules to get some clue about the nesting sy
 If your project is special - you can override or provide aditional modules just for the project.
 
 What do you need to do:
-1. Create a step file: `{ProjectRepo}/jenkins/modules/{Stage}/{Name}{Stage}.groovy` (name could be empty)
+1. Create a step file: `{ProjectRepo}/.jenkins/modules/{Stage}/{Name}{Stage}.groovy` (name could be empty)
 2. Fill the step with your required logic: you can use CFG flatten map variable & MPL functions inside the steps definition
 3. Use this step in your custom pipeline (or, if it's override, in standard pipeline) via MPLModule method.
 4. Provided custom modules will be available to use after the checkout of your project source only
@@ -94,7 +95,7 @@ MPL supporting the nested libraries to simplify work for a big teams which would
 
 Basically you just need to provide your `vars` interfaces and specify the mpl library to use it:
 
-* `{NestedLib}/vars/NestedMPLInit.groovy`:
+* `{NestedLib}/vars/MPLInit.groovy`:
   ```
   def call() {
     // Using the latest release MPL and adding the custom path to find modules
@@ -153,7 +154,7 @@ We fine with standard pipeline, but would like to use different deploy stage.
   // Use default master pipeline
   MPLPipeline {}
   ```
-* `{ProjectRepo}/jenkins/modules/Deploy/Deploy.groovy`:
+* `{ProjectRepo}/.jenkins/modules/Deploy/Deploy.groovy`:
   ```
   // Any step could be here, config modification, etc.
   echo "Let's begin the deployment process!"

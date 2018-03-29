@@ -30,8 +30,12 @@ package com.griddynamics.devops.mpl
  */
 @Singleton
 class MPLManager implements Serializable {
+  /** List of paths which is used to find modules in libraries */
+  private List modulesLoadPaths = ['com/griddynamics/devops/mpl']
+
   /** Pipeline configuration */
   private Map config = [:]
+
   /** Poststep lists container */
   private Map postSteps = [:]
 
@@ -99,5 +103,23 @@ class MPLManager implements Serializable {
    */
   public void postStepsRun(String name = 'always') {
     postSteps[name]?.reverseEach { it() }
+  }
+
+  /**
+   * Get the modules load paths in reverse order to make sure that defined last will be listed first
+   *
+   * @return  List of paths
+   */
+  public List getModulesLoadPaths() {
+    modulesLoadPaths.reverse()
+  }
+
+  /**
+   * Add path to the modules load paths list
+   *
+   * @param path  string with resource path to the parent folder of modules
+   */
+  public void addModulesLoadPath(String path) {
+    modulesLoadPaths += path
   }
 }

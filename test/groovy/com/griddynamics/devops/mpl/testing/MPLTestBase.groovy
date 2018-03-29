@@ -25,6 +25,7 @@ package com.griddynamics.devops.mpl.testing
 
 import com.lesfurets.jenkins.unit.BasePipelineTest
 
+import com.griddynamics.devops.mpl.MPLManager
 import com.griddynamics.devops.mpl.Helper
 
 import java.security.AccessController
@@ -42,10 +43,13 @@ abstract class MPLTestBase extends BasePipelineTest {
     Helper.metaClass.static.getModulesList = { String path ->
       def modules = []
       def resourcesFolder = helper.getLibraryClassLoader().getResource('.').getFile()
-      helper.getLibraryClassLoader().getResources(path).each { res ->
-        def libname = res.getFile().substring(resourcesFolder.length())
-        libname = libname.substring(0, Math.max(libname.indexOf('@'), 0))
-        modules += [[libname, res.text]]
+      MPLManager.instance.getModulesLoadPaths().each { modulesPath ->
+        def libPath = modulesPath + '/' + path
+        helper.getLibraryClassLoader().getResources(libPath).each { res ->
+          def libname = res.getFile().substring(resourcesFolder.length())
+          libname = libname.substring(0, Math.max(libname.indexOf('@'), 0))
+          modules += [[libname + '/' + libPath, res.text]]
+        }
       }
       return modules
     }

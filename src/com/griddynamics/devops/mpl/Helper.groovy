@@ -23,6 +23,8 @@
 
 package com.griddynamics.devops.mpl
 
+import java.nio.file.Paths
+
 import com.cloudbees.groovy.cps.NonCPS
 
 import org.jenkinsci.plugins.workflow.cps.CpsGroovyShellFactory
@@ -57,7 +59,7 @@ abstract class Helper {
    * Idea from LibraryAdder.findResource() function
    *
    * @param path  Module resource path
-   * @return  list of maps with pairs lib name: module source code
+   * @return  list of maps with pairs "module path: module source code"
    *
    * @see org.jenkinsci.plugins.workflow.libs.LibraryAdder#findResources(CpsFlowExecution execution, String name)
    */
@@ -73,8 +75,11 @@ abstract class Helper {
     def modules = []
     def libs = new FilePath(executable.getRootDir()).child('libs')
     action.getLibraries().each { lib ->
-      def f = libs.child(lib.name + '/resources/' + path)
-      if( f.exists() ) modules += [[lib.name, f.readToString()]]
+      MPLManager.instance.getModulesLoadPaths().each { modulesPath ->
+        def libPath = Paths.get(lib.name, 'resources', modulesPath, path).toString()
+        def f = libs.child(libPath)
+        if( f.exists() ) modules += [[libPath, f.readToString()]]
+      }
     }
     return modules
   }
