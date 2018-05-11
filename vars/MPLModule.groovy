@@ -51,8 +51,8 @@ def call(String name = env.STAGE_NAME, Map cfg = null) {
 
   // Reading module definition from workspace or from the library resources
   def module_src = null
-  if( fileExists(project_path) && (! module_path.contains(project_path)) ) {
-    module_path = 'project:' + project_path
+  if( fileExists(project_path) && (! active_modules.contains(project_path)) ) {
+    module_path = project_path
     module_src = readFile(project_path)
   } else {
     // Searching for the not executed module from the loaded libraries
