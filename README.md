@@ -89,6 +89,23 @@ What do you need to do:
 
 For example: "Maven Build" steps have path `modules/Build/MavenBuild.groovy` and placed in the library - feel free to check it out.
 
+### Enforcing modules
+
+To make sure that some of your stages will be executed for sure - you can add a list of modules that could be overrided on the project side.
+Just make sure, that you executing function `MPLEnforce` and provide list of modules that could be overriden in your pipeline script:
+Jenkins job script:
+```
+@Library('mpl@release') _
+
+// Only 'Build Maven' & 'Deploy' modules could be overriden on the project side
+MPLEnforce(['Build Maven', 'Deploy'])
+
+... // Your enforced pipeline
+```
+Notices:
+* The function `MPLEnforce` could be executed only once, after that it will ignore any further executions.
+* This trick is really working only if you controlling the job pipeline scripts, with Jenkinsfile it's not so secure.
+
 ### Nested libraries
 
 MPL supporting the nested libraries to simplify work for a big teams which would like to use MPL but with some modifications.
@@ -99,7 +116,8 @@ Basically you just need to provide your `vars` interfaces and specify the mpl li
   ```
   def call() {
     // Using the latest release MPL and adding the custom path to find modules
-    library('mpl@release').com.griddynamics.devops.mpl.MPLManager.instance.addModulesLoadPath('com/company/nestedlib')
+    library('mpl@release')
+    MPLModulesPath('com/yourcompany/mpl')
   }
   ```
 * `{NestedLib}/vars/NestedPipeline.groovy`:
@@ -124,6 +142,10 @@ Jenkins shared libraries is just a repositories connected to the Jenkins Master 
 * branch:**TICKET-1234** - feature branch, could be used for testing purposes.
 
 ## Examples
+
+### Wiki page examples
+
+Please check the wiki page to see some MPL examples: [MPL Wiki](https://github.com/griddynamics/mpl/wiki)
 
 ### Standard Pipeline usage
 
