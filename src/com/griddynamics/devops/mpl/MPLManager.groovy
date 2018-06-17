@@ -39,6 +39,9 @@ class MPLManager implements Serializable {
   /** Poststep lists container */
   private Map postSteps = [:]
 
+  /** Poststeps errors store */
+  private Map postStepsErrors = [:]
+
   /** Flag to enable enforcement of the modules on project side */
   private Boolean enforced = false
 
@@ -99,7 +102,7 @@ class MPLManager implements Serializable {
   public void postStep(String name, Closure body) {
     // TODO: Parallel execution - could be dangerous
     if( ! postSteps[name] ) postSteps[name] = []
-    postSteps[name] << body
+    postSteps[name] << [module: Helper.activeModules()?.first(), body: body]
   }
 
   /**
@@ -108,8 +111,40 @@ class MPLManager implements Serializable {
    * @param name  Poststeps list name
    */
   public void postStepsRun(String name = 'always') {
-    postSteps[name]?.reverseEach { it() }
+    if( postSteps[name] ) {
+      for( def i = postSteps[name].size()-1; i >= 0 ; i-- ) {
+        try {
+          postSteps[name][i]['body']()
+        }
+        catch( ex ) {
+          postStepError(name, postSteps[name][i]['module'], ex)
+        }
+      }
+    }
   }
+
+  /**
+   * Post steps could end with errors - and it will be stored to get it later
+   *
+   * @param name  Poststeps list name
+   * @param module  Name of the module
+   * @param exception  Exception object with error
+   */
+  public void postStepError(String name, String module, Exception exception) {
+    if( ! postStepsErrors[name] ) postStepsErrors[name] = []
+    postStepsErrors[name] << [module: module, error: exception]
+  }
+  
+  /**
+   * Get the list of errors become while poststeps execution
+   *
+   * @param name  Poststeps list name
+   * @return  List of errors
+   */
+  public List getPostStepsErrors(String name) {
+    postStepsErrors[name] ?: []
+  }
+
 
   /**
    * Get the modules load paths in reverse order to make sure that defined last will be listed first

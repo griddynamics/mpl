@@ -32,4 +32,7 @@ import com.griddynamics.devops.mpl.MPLManager
  */
 def call(String name) {
   MPLManager.instance.postStepsRun(name)
+  def errors = MPLManager.instance.getPostStepsErrors(name)
+  for( int e in errors )
+    println "PostStep '${name}' error: ${e.module}: ${e.error}"
 }
