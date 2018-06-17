@@ -39,6 +39,12 @@ class MPLManager implements Serializable {
   /** Poststep lists container */
   private Map postSteps = [:]
 
+  /** Flag to enable enforcement of the modules on project side */
+  private Boolean enforced = false
+
+  /** List of modules available on project side while enforcement */
+  private List enforcedModules = []
+
   /**
    * Initialization for the MPL manager
    *
@@ -121,5 +127,26 @@ class MPLManager implements Serializable {
    */
   public void addModulesLoadPath(String path) {
     modulesLoadPaths += path
+  }
+
+  /**
+   * Enforce modules override on project side - could be set just once while execution
+   *
+   * @param modules  List of modules available to be overriden on the project level
+   */
+  public void enforce(List modules) {
+    if( enforced == true ) return // Execute function only once while initialization
+    enforced = true
+    enforcedModules = modules
+  }
+
+  /**
+   * Check module in the enforced list
+   *
+   * @param module  Module name
+   * @return  Boolean module in the list, will always return true if not enforced
+   */
+  public Boolean checkEnforcedModule(String module) {
+    ! enforced ?: enforcedModules.contains(module)
   }
 }
