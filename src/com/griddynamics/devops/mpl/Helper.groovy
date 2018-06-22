@@ -92,7 +92,8 @@ abstract class Helper {
    * @return  modified base map
    */
   static Map mergeMaps(Map base, Map overlay) {
-    if( ! overlay ) return base
+    if( ! (base in Map) ) base = [:]
+    if( ! (overlay in Map) ) return overlay
     overlay.each { key, val ->
       base[key] = base[key] in Map ? mergeMaps(base[key], val) : val
     }
