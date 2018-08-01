@@ -2,4 +2,4 @@
  * Common test module
  */
 
-echo "${CFG}"
+echo 'No tests provided'
