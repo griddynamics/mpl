@@ -31,9 +31,10 @@ import com.griddynamics.devops.mpl.MPLException
  * @author Sergei Parshev <sparshev@griddynamics.com>
  * @param body      Configuration for the pipeline
  * @param defaults  Default configuration from the pipeline definition
+ * @param overrides Mandatory settings for the pipeline that will override config settings
  * @return MPLManager singleton object
  */
-def call(body, Map defaults = [:]) {
+def call(body, Map defaults = [:], Map overrides = [:]) {
   def config = defaults
 
   // Merging configs
@@ -45,6 +46,8 @@ def call(body, Map defaults = [:]) {
     Helper.mergeMaps(config, body)
   } else
     throw new MPLException("Unsupported MPL pipeline configuration type provided: ${body}")
+
+  Helper.mergeMaps(config, overrides)
 
   // Init the MPL Pipeline
   MPLManager.instance.init(config)
