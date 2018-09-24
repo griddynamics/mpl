@@ -55,6 +55,8 @@ class BuildTest extends MPLTestBase {
 
     super.setUp()
 
+    binding.setVariable('env', [:])
+
     helper.registerAllowedMethod('fileExists', [String.class], null)
     helper.registerAllowedMethod('tool', [String.class], { name -> "${name}_HOME" })
     helper.registerAllowedMethod('withEnv', [List.class, Closure.class], null)
