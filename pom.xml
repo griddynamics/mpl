@@ -126,9 +126,9 @@
                 <configuration>
                     <sources>
                         <source>
-                            <directory>${project.basedir}/src</directory>
+                            <directory>${project.basedir}</directory>
                             <includes>
-                                <include>**/*.groovy</include>
+                                <include>src/**/*.groovy</include>
                             </includes>
                         </source>
                         <source>
@@ -137,7 +137,7 @@
                                 <include>**/*.groovy</include>
                             </includes>
                         </source>
-                        <!-- Disabled tue to unable to actually provide interceptors into MPLModule execution -->
+                        <!-- Disabled due to unable to actually provide interceptors into MPLModule execution -->
                         <!--source>
                             <directory>${project.basedir}/vars</directory>
                             <includes>
@@ -177,6 +177,27 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-source-plugin</artifactId>
+              <configuration>
+                <excludes>
+                    <exclude>target/</exclude>
+                    <exclude>test/</exclude>
+                </excludes>
+                <includes>
+                  <include>**/*.groovy</include>
+                </includes>
+              </configuration>
+              <executions>
+                <execution>
+                  <id>attach-sources</id>
+                  <goals>
+                    <goal>jar</goal>
+                  </goals>
+                </execution>
+              </executions>
             </plugin>
         </plugins>
     </build>
