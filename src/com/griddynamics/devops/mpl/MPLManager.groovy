@@ -48,6 +48,9 @@ class MPLManager implements Serializable {
   /** List of modules available on project side while enforcement */
   private List enforcedModules = []
 
+  /** List of currently executed modules */
+  private List activeModules = []
+
   /**
    * Initialization for the MPL manager
    *
@@ -102,7 +105,7 @@ class MPLManager implements Serializable {
   public void postStep(String name, Closure body) {
     // TODO: Parallel execution - could be dangerous
     if( ! postSteps[name] ) postSteps[name] = []
-    postSteps[name] << [module: Helper.activeModules()?.last(), body: body]
+    postSteps[name] << [module: getActiveModules()?.last(), body: body]
   }
 
   /**
@@ -183,5 +186,30 @@ class MPLManager implements Serializable {
    */
   public Boolean checkEnforcedModule(String module) {
     ! enforced ?: enforcedModules.contains(module)
+  }
+
+  /**
+   * Get list of currently executing modules
+   *
+   * @return  List of modules paths
+   */
+  public getActiveModules() {
+    activeModules
+  }
+
+  /**
+   * Add active module to the stack-list
+   *
+   * @param path  Path to the module (including library if it's the library)
+   */
+  public pushActiveModule(String path) {
+    activeModules += path
+  }
+
+  /**
+   * Removing the latest active module from the list
+   */
+  public popActiveModule() {
+    activeModules.pop()
   }
 }

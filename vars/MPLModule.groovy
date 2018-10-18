@@ -42,7 +42,7 @@ def call(String name = env.STAGE_NAME, Map cfg = null) {
   
   // Trace of the running modules to find loops
   // Also to make ability to use lib module from overridden one
-  def active_modules = Helper.activeModules()
+  def active_modules = MPLManager.instance.getActiveModules()
 
   // Determining the module source file and location
   def base = (cfg.name ?: name).tokenize()
@@ -66,11 +66,15 @@ def call(String name = env.STAGE_NAME, Map cfg = null) {
     throw new MPLModuleException("Unable to find not active module to execute: ${(active_modules).join(' --> ')} -X> ${module_path}")
 
   try {
+    MPLManager.instance.pushActiveModule(module_path)
     Helper.runModule(module_src, module_path, [CFG: Helper.flatten(cfg)])
   }
   catch( ex ) {
     def newex = new MPLModuleException("Found error during execution of the module '${module_path}':\n${ex}")
     newex.setStackTrace(Helper.getModuleStack(ex))
     throw newex
+  }
+  finally {
+    MPLManager.instance.popActiveModule()
   }
 }
