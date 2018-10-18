@@ -36,6 +36,7 @@ abstract class MPLTestBase extends BasePipelineTest {
   MPLTestBase() {
     helper = new MPLTestHelper()
   }
+
   void setUp() throws Exception {
     super.setUp()
 
@@ -57,6 +58,7 @@ abstract class MPLTestBase extends BasePipelineTest {
     // Replacing runModule function to mock it
     Helper.metaClass.static.runModule = { String source, String path, Map vars = [:] ->
       def binding = new Binding()
+      this.binding.variables.each { k, v -> binding.setVariable(k, v) }
       vars.each { k, v -> binding.setVariable(k, v) }
       def loader = AccessController.doPrivileged(new PrivilegedAction<GroovyClassLoader>() {
         public GroovyClassLoader run() {

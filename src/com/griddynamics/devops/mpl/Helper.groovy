@@ -126,15 +126,6 @@ abstract class Helper {
   }
 
   /**
-   * Get a list of currently executing modules files
-   *
-   * @return  list with exicuting modules stack
-   */
-  static List activeModules() {
-    new Throwable().getStackTrace().collect { it.getFileName() }.findAll { it?.contains('modules/') }.reverse()
-  }
-
-  /**
    * Cutting a stacktrace to just first execution of the module and one before
    *
    * @param exception  container of the stacktrace

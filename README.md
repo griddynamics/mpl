@@ -132,12 +132,13 @@ And after that and configuring the library for your jenkins (just put it after t
 
 Also you can override resources of the MPL library - but it's forever. You can't use MPL resource anymore if you will override it in the nested library.
 
+You can cover the nested library with tests as well as MPL library - please check the nested library example on wiki page.
+
 ## Release process
 
 Jenkins shared libraries is just a repositories connected to the Jenkins Master instance. So you can use any branch/tag from the MPL or nested lib repo.
 
-* tag:**release** - latest available release. If you want to be on track, please use this tag by default.
-* tag:**18.04** - released version of the library. Can be used to pin the version.
+* branch:**18.04** - released version of the library. Can be used to pin the version.
 * branch:**master** - most fresh functions (and bugs) are here. You can use it for testing purposes.
 * branch:**TICKET-1234** - feature branch, could be used for testing purposes.
 
