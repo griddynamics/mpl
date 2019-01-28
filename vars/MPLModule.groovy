@@ -75,6 +75,15 @@ def call(String name = env.STAGE_NAME, Map cfg = null) {
     throw newex
   }
   finally {
+    MPLManager.instance.modulePostStepsRun(name)
+    def errors = MPLManager.instance.getPostStepsErrors(name)
+    if( errors ) {
+      for( int e in errors )
+        println "Module '${name}' got error during execution of poststep from module '${e.module}': ${e.error}"
+      def newex = new MPLModuleException("Found error during execution poststeps for the module '${module_path}'")
+      newex.setStackTrace(Helper.getModuleStack(newex))
+      throw newex
+    }
     MPLManager.instance.popActiveModule()
   }
 }

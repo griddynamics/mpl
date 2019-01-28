@@ -39,6 +39,9 @@ class MPLManager implements Serializable {
   /** Poststep lists container */
   private Map postSteps = [:]
 
+  /** Module poststep lists container */
+  private Map modulePostSteps = [:]
+
   /** Poststeps errors store */
   private Map postStepsErrors = [:]
 
@@ -109,6 +112,18 @@ class MPLManager implements Serializable {
   }
 
   /**
+   * Add module post step to the list
+   *
+   * @param name  Module poststeps list name
+   * @param body  Definition of steps to include in the list
+   */
+  public void modulePostStep(String name, Closure body) {
+    // TODO: Parallel execution - could be dangerous
+    if( ! modulePostSteps[name] ) modulePostSteps[name] = []
+    modulePostSteps[name] << [module: getActiveModules()?.last(), body: body]
+  }
+
+  /**
    * Execute post steps filled by modules in reverse order
    *
    * @param name  Poststeps list name
@@ -121,6 +136,24 @@ class MPLManager implements Serializable {
         }
         catch( ex ) {
           postStepError(name, postSteps[name][i]['module'], ex)
+        }
+      }
+    }
+  }
+
+  /**
+   * Execute module post steps filled by module in reverse order
+   *
+   * @param name  Module poststeps list name
+   */
+  public void modulePostStepsRun(String name) {
+    if( modulePostSteps[name] ) {
+      for( def i = modulePostSteps[name].size()-1; i >= 0 ; i-- ) {
+        try {
+          modulePostSteps[name][i]['body']()
+        }
+        catch( ex ) {
+          postStepError(name, modulePostSteps[name][i]['module'], ex)
         }
       }
     }

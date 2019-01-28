@@ -12,6 +12,20 @@ Shared jenkins library with modular structure allow to write a simple pipeline m
 * Prepare set of simple & minimal basic pipelines
 * Make it easy to create tests for modules & pipelines
 
+## Documentation
+
+This readme contains mostly technical information, if you need some overview - please check the next resources:
+
+* [Grid Dynamics Blog](https://blog.griddynamics.com/developing-a-modular-pipeline-library-to-improve-devops-collaboration/)
+* Overview & demo videos:
+  * [MPL Intro](https://youtu.be/NpnQS3fFlyI)
+  * [MPL Overview](https://youtu.be/wwi7oREL02k)
+  * [Demo of the MPL Build](https://youtu.be/QZsQThhPk-Y)
+  * [Demo of the Nested Library](https://youtu.be/UsThHFze76Y)
+  * [Demo of the Petclinic Pipeline](https://youtu.be/GLtvxY1S3Aw)
+
+You also can check [MPL Wiki](https://github.com/griddynamics/mpl/wiki) to find additional info.
+
 ## Dependencies
 
 * Jenkins >= 2.74 LTS
@@ -88,6 +102,76 @@ What do you need to do:
 4. Provided custom modules will be available to use after the checkout of your project source only
 
 For example: "Maven Build" steps have path `modules/Build/MavenBuild.groovy` and placed in the library - feel free to check it out.
+
+### Post Steps
+
+MPL supports 2 useful poststep interfaces which allow you to store all the logic of module in the same file.
+
+All the poststeps will be executed in LIFO order and all the exceptions will be collected & displayed in the logs.
+
+#### MPLModulePostStep
+
+Allow to set some actions that need to be executed right after the current module (doesn't matter it fails or not).
+
+Could be useful when you need to collect reports or clean stage agent before it will be killed.
+
+If module post step fails - it's fatal for the module, so the pipeline will fail (unlike general poststeps). All the poststeps
+for the module will be executed and errors will be printed, but module will fail.
+
+`{NestedLibModules}/Build/MavenBuild.groovy`:
+```
+MPLModulePostStep {
+  junit 'target/junitReport/*.xml'
+}
+
+// Could fail but our poststep will be executed
+MPLModule('Maven Build', CFG)
+```
+
+#### MPLPostStep
+
+General poststep interface usually used in the pipelines. Requires 2 calls - first one to define poststep in a module and second one
+to execute it and usually placed in the pipeline post actions.
+
+When error occurs during poststeps execution - it will be printed in the log, but status of pipeline will not be affected.
+
+1. `{NestedLibModules}/Deploy/OpenshiftDeploy.groovy`:
+   ```
+   MPLPostStep('always') {
+     echo "OpenShift Deploy Decomission poststep"
+   }
+ 
+   echo 'Executing Openshift Deploy process'
+   ```
+2. `{NestedLib}/var/CustomPipeline.groovy`:
+   ```
+   def call(body) {
+     ...
+     pipeline {
+       ...
+       stages {
+         ...
+         stage( 'Openshift Deploy' ) {
+           steps {
+             MPLModule()
+           }
+         }
+         ...
+       }
+       post {
+         always {
+           MPLPostStepsRun('always')
+         }
+         success {
+           MPLPostStepsRun('success')
+         }
+         failure {
+           MPLPostStepsRun('failure')
+         }
+       }
+     }
+   }
+   ```
 
 ### Enforcing modules
 
