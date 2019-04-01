@@ -24,6 +24,7 @@
 package com.griddynamics.devops.mpl.testing
 
 import com.lesfurets.jenkins.unit.PipelineTestHelper
+import com.lesfurets.jenkins.unit.MethodSignature
 
 @groovy.transform.InheritConstructors
 class MPLTestHelper extends PipelineTestHelper {
