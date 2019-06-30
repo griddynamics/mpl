@@ -79,10 +79,11 @@ class MPLManager implements Serializable {
    * Module config is a pipeline config without modules section and with overrided values from the module itself.
    *
    * @param name  module name
+   *
    * @return  Overriden configuration for the specified module
    */
-  public Map moduleConfig(String name) {
-    config.modules ? Helper.mergeMaps(config.subMap(config.keySet()-'modules'), (config.modules[name] ?: [:])) : config
+  public MPLConfig moduleConfig(String name) {
+    MPLConfig.create(config.modules ? Helper.mergeMaps(config.subMap(config.keySet()-'modules'), (config.modules[name] ?: [:])) : config)
   }
 
   /**

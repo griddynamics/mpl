@@ -75,6 +75,59 @@ There is 2 ways to slightly reconfigure the provided standard pipeline:
 
 If both ways are not helping - just create your own pipeline definition in the Jenkinsfile and use MPL modules or create your own nested library with your standard pipelines.
 
+### Configuration
+
+Usually configuration is initialized in the pipeline - it's calling `MPLPipelineConfig` interface with arguments:
+* `body` - Map/Closure with configuration from the Jenkinsfile
+* `defaults` - pipeline default values (could be overridden by Jenkinsfile)
+* `overrides` - pipeline hard values (could not be overridden by Jenkinsfile)
+
+After that pipeline defining MPL object and use it's common functions to define the pipeline itself. Pipeline is calling MPLModule that calling the required module logic.
+
+In the module we have a common predefined variables (like default `steps`, `env`, `params`, `currentBuild`...) and a new variable contains the pipeline/module configs: `CFG`.
+It's a special MPLConfig object that defines interface to get and set the properties. It's promising a number of things:
+* Get value will never throw exception
+* Unable to change values of `CFG` through get or clone
+* It's not related to the parent module or pipeline `CFG` - any changes could be only forwarded to the children module
+* You can get raw config Map/List - but they will act like a normal Map/List (could cause exceptions)
+* Set of the `CFG` value could cause exceptions in certain circumstances:
+  * set improper List index (non-positive integer)
+  * set sublevels for defined non-collections
+
+Use of the `CFG` object is quite simple. Imagine we have the next pipeline configuration:
+```
+[
+  agent_label: '',
+  val1: 4,
+  val2: [
+    val_nested: 'value',
+    val_list: [1,2,3,4],
+  ],
+]
+```
+
+* Get value of specific property:
+  * `CFG.val1` == `CFG.'val1'` == `4`
+  * `CFG.'val2.val_nested'` == `'value'`
+  * `CFG.'val2.not_exist'` == `null`
+  * `CFG.'val2.not_exist' ?: 'default'` == `'default'`
+  * `CFG.'val2.val_list.2'` == `3`
+* Get raw Map or List:
+  * `CFG.'val2.val_list'` == `[1,2,3,4]`
+  * `CFG.val2` == `[val_nested:'value',val_list:[1,2,3,4]]`
+
+* Set value of a specific property:
+  * `CFG.val1 = 3`; `CFG.val1` == `3`
+  * `CFG.'val2.val_nested' = 555`; `CFG.val2.val_nested` == `555`
+* Create new properties:
+  * `CFG.val4 = 'newval'`; `CFG.val4` == `'newval'`
+  * `CFG.'val2.val_list.5' = 333`; `CFG.'val2.val_list'` == `[1,2,3,4,null,333]`
+* Replace entire Map or List:
+  * `CFG.'val2.val_list' = null`; `CFG.val2` == `[val_nested:'value',val_list:null]`
+  * `CFG.val2 = [new_key:[4,3,2,1]]`; `CFG.val2` == `[new_key:[4,3,2,1]]`
+
+So you got the point - hopefully this will be helpful and will allow you to create the great interfaces for your modules.
+
 ### Modules
 
 MPL is mostly modules with logic. Basic features:
@@ -99,7 +152,7 @@ If your project is special - you can override or provide aditional modules just 
 
 What do you need to do:
 1. Create a step file: `{ProjectRepo}/.jenkins/modules/{Stage}/{Name}{Stage}.groovy` (name could be empty)
-2. Fill the step with your required logic: you can use CFG flatten map variable & MPL functions inside the steps definition
+2. Fill the step with your required logic: you can use `CFG` config object & MPL functions inside the steps definition
 3. Use this step in your custom pipeline (or, if it's override, in standard pipeline) via MPLModule method.
 4. Provided custom modules will be available to use after the checkout of your project source only
 
