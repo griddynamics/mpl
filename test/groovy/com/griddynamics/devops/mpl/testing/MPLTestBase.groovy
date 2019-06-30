@@ -25,6 +25,7 @@ package com.griddynamics.devops.mpl.testing
 
 import com.lesfurets.jenkins.unit.BasePipelineTest
 
+import com.griddynamics.devops.mpl.MPLConfig
 import com.griddynamics.devops.mpl.MPLManager
 import com.griddynamics.devops.mpl.Helper
 
@@ -71,5 +72,8 @@ abstract class MPLTestBase extends BasePipelineTest {
       script.metaClass.methodMissing = helper.getMethodMissingInterceptor()
       script.run()
     }
+    
+    // Show the dump of the configuration during unit tests execution
+    Helper.metaClass.static.configEntrySet = { Map config -> config.entrySet() }
   }
 }

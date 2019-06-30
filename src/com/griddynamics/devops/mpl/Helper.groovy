@@ -101,16 +101,24 @@ abstract class Helper {
   }
 
   /**
-   * Converts map to a simply flatten map
+   * Deep copy of the Map or List
    *
-   * @param data       map to flatten
-   * @param separator  keys separator
-   * @return  map with flatten keys
+   * @param value      value to deep copy
+   *
+   * @return  value type without any relation to the original value
    */
-  static Map flatten(Map data, String separator = '.') {
-    data.collectEntries { k, v ->
-      v instanceof Map ? flatten(v, separator).collectEntries { q, r -> [(k + separator + q): r] } : [(k):v]
-    }
+  @NonCPS
+  static cloneValue(value) {
+    def out
+
+    if( value in Map )
+      out = value.collectEntries { k, v -> [k, cloneValue(v)] }
+    else if( value in List )
+      out = value.collect { cloneValue(it) }
+    else
+      out = value
+
+    return out
   }
 
   /**
@@ -176,5 +184,17 @@ abstract class Helper {
         return s.getLineNumber()
     }
     return null
+  }
+
+  /**
+   * Special function to return exception if someone tries to use MPLConfig in a wrong way
+   * Basically used just to be overridden on the unit tests side.
+   *
+   * @param config  current MPLConfig configuration
+   *
+   * @return  Set of entries - but only when overridden by unit tests
+   */
+  static Set configEntrySet(Map config) {
+    throw new MPLException('Forbidden to iterate over MPLConfig')
   }
 }
