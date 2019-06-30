@@ -70,7 +70,7 @@ def call(String name = env.STAGE_NAME, Map cfg = null) {
     Helper.runModule(module_src, module_path, [CFG: Helper.flatten(cfg)])
   }
   catch( ex ) {
-    def newex = new MPLModuleException("Found error during execution of the module '${module_path}':\n${ex}")
+    def newex = new MPLModuleException("Found error during execution of the module '${module_path}#${Helper.getModuleExceptionLine(module_path, ex)}':\n${ex}")
     newex.setStackTrace(Helper.getModuleStack(ex))
     throw newex
   }
