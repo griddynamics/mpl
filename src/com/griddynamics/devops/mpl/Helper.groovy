@@ -155,7 +155,7 @@ abstract class Helper {
    * @param module_path  MPL module path or module file name
    * @param exception  container of the stacktrace
    *
-   * @return  List with stack trace elements
+   * @return  Module line number or null if not found
    */
   static Integer getModuleExceptionLine(String module_path, Throwable exception) {
     List stack = exception.getStackTrace()
