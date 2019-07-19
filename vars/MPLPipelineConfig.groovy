@@ -29,9 +29,11 @@ import com.griddynamics.devops.mpl.MPLException
  * MPL pipeline helper to provide the default modules configuration
  *
  * @author Sergei Parshev <sparshev@griddynamics.com>
+ *
  * @param body      Configuration for the pipeline
  * @param defaults  Default configuration from the pipeline definition
  * @param overrides Mandatory settings for the pipeline that will override config settings
+ *
  * @return MPLManager singleton object
  */
 def call(body, Map defaults = [:], Map overrides = [:]) {
@@ -41,7 +43,14 @@ def call(body, Map defaults = [:], Map overrides = [:]) {
   if( body in Closure ) {
     body.resolveStrategy = Closure.DELEGATE_FIRST
     body.delegate = config
+
+    body.setProperty('env', env)
+    body.setProperty('params', params)
+    body.setProperty('currentBuild', currentBuild)
     body()
+    config.remove('env')
+    config.remove('params')
+    config.remove('currentBuild')
   } else if( body in Map ) {
     Helper.mergeMaps(config, body)
   } else
