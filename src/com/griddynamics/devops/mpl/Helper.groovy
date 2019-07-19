@@ -136,21 +136,14 @@ abstract class Helper {
     List stack = exception.getStackTrace()
 
     // For jenkins to remove starting trace items
-    if( stack.last()?.getFileName() == 'Thread.java' ) {
+    if( stack.size() > 0 && stack.last()?.getFileName() == 'Thread.java' ) {
       // Finding the first MPLModule call and cutting the trace
-      for( def i = stack.size(); i--; i > 0 ) {
-        if( stack[i-1].getFileName()?.contains('MPLModule.groovy') )
+      for( def i = stack.size(); i--; /* inverse for */ ) {
+        if( stack[i-1].getFileName()?.endsWith('MPLModule.groovy') )
           break
         else
           stack.remove(i)
       }
-    }
-
-    // Removing not interesting sources from the output to simplify debug
-    for( def i = stack.size(); i--; i > 0 ) {
-      if( !stack[i]?.getFileName()?.endsWith('.groovy') ||
-          stack[i]?.getFileName() in ['MPLModule.groovy', 'Helper.groovy', 'PipelineTestHelper.groovy', 'MPLTestBase.groovy'] )
-        stack.remove(i)
     }
 
     stack as StackTraceElement[]
@@ -166,9 +159,16 @@ abstract class Helper {
    */
   static Integer getModuleExceptionLine(String module_path, Throwable exception) {
     List stack = exception.getStackTrace()
+    // First try to find the complete module path
+    for( def s in stack ) {
+      if( s?.getFileName() == module_path )
+        return s.getLineNumber()
+    }
+
+    // Second try to find at least a module file name
     def module_file = module_path.tokenize('/').last()
     for( def s in stack ) {
-      if( s?.getFileName() == module_file )
+      if( s?.getFileName()?.endsWith(module_file) )
         return s.getLineNumber()
     }
     return null
