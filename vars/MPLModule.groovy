@@ -72,6 +72,8 @@ def call(String name = env.STAGE_NAME, Map cfg = null) {
   catch( ex ) {
     
     if (ex instanceof org.jenkinsci.plugins.workflow.steps.FlowInterruptedException) {
+      //The exception is used by Jenkins to abort a running build and consequently
+      //does not constitute an execution error of the running MPL module.
       throw ex
     }
 
