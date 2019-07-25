@@ -24,6 +24,7 @@
 import com.griddynamics.devops.mpl.Helper
 import com.griddynamics.devops.mpl.MPLManager
 import com.griddynamics.devops.mpl.MPLModuleException
+import org.jenkinsci.plugins.workflow.steps.FlowInterruptedException
 
 /**
  * Finding module implementation and executing it with specified configuration
@@ -69,14 +70,12 @@ def call(String name = env.STAGE_NAME, Map cfg = null) {
     MPLManager.instance.pushActiveModule(module_path)
     Helper.runModule(module_src, module_path, [CFG: Helper.flatten(cfg)])
   }
+  catch( FlowInterruptedException ex) {
+    //The exception is used by Jenkins to abort a running build and consequently
+    //does not constitute an execution error of the running MPL module.
+    throw ex
+  }
   catch( ex ) {
-    
-    if (ex instanceof org.jenkinsci.plugins.workflow.steps.FlowInterruptedException) {
-      //The exception is used by Jenkins to abort a running build and consequently
-      //does not constitute an execution error of the running MPL module.
-      throw ex
-    }
-
     def newex = new MPLModuleException("Found error during execution of the module '${module_path}':\n${ex}")
     newex.setStackTrace(Helper.getModuleStack(ex))
     throw newex
