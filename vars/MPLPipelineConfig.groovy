@@ -41,13 +41,19 @@ def call(body, Map defaults = [:], Map overrides = [:]) {
 
   // Merging configs
   if( body in Closure ) {
+    // This logic allow us to use configuration closures instead of maps
     body.resolveStrategy = Closure.DELEGATE_FIRST
     body.delegate = config
 
-    body.setProperty('env', env)
-    body.setProperty('params', params)
-    body.setProperty('currentBuild', currentBuild)
+    // Make sure the global variables will be available in the config closure
+    config.env = env
+    config.params = params
+    config.currentBuild = currentBuild
+
+    // Here we executing the closure to update the pipeline defaults with the closure values
     body()
+
+    // Removing the global variables from the config
     config.remove('env')
     config.remove('params')
     config.remove('currentBuild')
