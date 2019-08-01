@@ -146,6 +146,10 @@ abstract class Helper {
       }
     }
 
+    // If the exception are not from the mpl pipeline - need to show at least something
+    if( stack.isEmpty() )
+      stack = exception.getStackTrace()
+
     stack as StackTraceElement[]
   }
 
