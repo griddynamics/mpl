@@ -126,19 +126,55 @@ abstract class Helper {
   }
 
   /**
-   * Cutting a stacktrace to just first execution of the module and one before
+   * Cut & simplify a stacktrace
    *
    * @param exception  container of the stacktrace
+   *
    * @return  List with stack trace elements
    */
   static StackTraceElement[] getModuleStack(Throwable exception) {
     List stack = exception.getStackTrace()
-    for( def i = stack.size(); i--; i > 0 ) {
-      if( stack[i-1].getFileName()?.contains('vars/MPLModule.groovy') )
-        break
-      else
-        stack.remove(i)
+
+    // For jenkins to remove starting trace items
+    if( stack.size() > 0 && stack.last()?.getFileName() == 'Thread.java' ) {
+      // Finding the first MPLModule call and cutting the trace
+      for( def i = stack.size(); i--; /* inverse for */ ) {
+        if( stack[i-1].getFileName()?.endsWith('MPLModule.groovy') )
+          break
+        else
+          stack.remove(i)
+      }
     }
+
+    // If the exception are not from the mpl pipeline - need to show at least something
+    if( stack.isEmpty() )
+      stack = exception.getStackTrace()
+
     stack as StackTraceElement[]
+  }
+
+  /**
+   * Looking the latest cause of the module file name and return it's line number
+   *
+   * @param module_path  MPL module path or module file name
+   * @param exception  container of the stacktrace
+   *
+   * @return  Module line number or null if not found
+   */
+  static Integer getModuleExceptionLine(String module_path, Throwable exception) {
+    List stack = exception.getStackTrace()
+    // First try to find the complete module path
+    for( def s in stack ) {
+      if( s?.getFileName() == module_path )
+        return s.getLineNumber()
+    }
+
+    // Second try to find at least a module file name
+    def module_file = module_path.tokenize('/').last()
+    for( def s in stack ) {
+      if( s?.getFileName()?.endsWith(module_file) )
+        return s.getLineNumber()
+    }
+    return null
   }
 }

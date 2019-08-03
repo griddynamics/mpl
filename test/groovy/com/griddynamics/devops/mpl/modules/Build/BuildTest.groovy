@@ -67,22 +67,27 @@ class BuildTest extends MPLTestBase {
   @Test
   void default_run() throws Exception {
     script.call('Build')
+
     printCallStack()
 
-    assertThat(helper.callStack
-      .findAll { c -> c.methodName == 'sh' }
-      .any { c -> c.argsToString().contains('clean install') }
-    ).isTrue()
+    assertThat(helper.callStack)
+      .filteredOn { c -> c.methodName == 'tool' }
+      .filteredOn { c -> c.argsToString().contains('Maven 3') }
+      .isNotEmpty()
 
-    assertThat(helper.callStack
-      .findAll { c -> c.methodName == 'tool' }
-      .any { c -> c.argsToString().contains('Maven 3') }
-    ).isTrue()
+    assertThat(helper.callStack)
+      .as('Shell execution should contain mvn command and default clean install')
+      .filteredOn { c -> c.methodName == 'sh' }
+      .filteredOn { c -> c.argsToString().startsWith('mvn') }
+      .filteredOn { c -> c.argsToString().contains('clean install') }
+      .isNotEmpty()
 
-    assertThat(helper.callStack
-      .findAll { c -> c.methodName == 'sh' }
-      .any { c -> ! c.argsToString().contains('-s ') }
-    ).isTrue()
+    assertThat(helper.callStack)
+      .as('Default mvn run without settings provided')
+      .filteredOn { c -> c.methodName == 'sh' }
+      .filteredOn { c -> c.argsToString().startsWith('mvn') }
+      .filteredOn { c -> ! c.argsToString().contains('-s ') }
+      .isNotEmpty()
 
     assertJobStatusSuccess()
   }
@@ -91,15 +96,17 @@ class BuildTest extends MPLTestBase {
   void change_tool() throws Exception {
     script.call('Build', [
       maven: [
-        tool_version: 'Maven 2'
-      ]
+        tool_version: 'Maven 2',
+      ],
     ])
+
     printCallStack()
 
-    assertThat(helper.callStack
-      .findAll { c -> c.methodName == 'tool' }
-      .any { c -> c.argsToString().contains('Maven 2') }
-    ).isTrue()
+    assertThat(helper.callStack)
+      .as('Changing maven tool name')
+      .filteredOn { c -> c.methodName == 'tool' }
+      .filteredOn { c -> c.argsToString().contains('Maven 2') }
+      .isNotEmpty()
 
     assertJobStatusSuccess()
   }
@@ -108,15 +115,17 @@ class BuildTest extends MPLTestBase {
   void change_settings() throws Exception {
     script.call('Build', [
       maven: [
-        settings_path: '/test-settings.xml'
-      ]
+        settings_path: '/test-settings.xml',
+      ],
     ])
+
     printCallStack()
 
-    assertThat(helper.callStack
-      .findAll { c -> c.methodName == 'sh' }
-      .any { c -> c.argsToString().contains("-s '/test-settings.xml'") }
-    ).isTrue()
+    assertThat(helper.callStack)
+      .as('Providing setings file should set the maven opetion')
+      .filteredOn { c -> c.methodName == 'sh' }
+      .filteredOn { c -> c.argsToString().contains("-s '/test-settings.xml'") }
+      .isNotEmpty()
 
     assertJobStatusSuccess()
   }

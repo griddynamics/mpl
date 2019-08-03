@@ -1,3 +1,3 @@
-@Library('mpl@release') _
+@Library('mpl') _
 
 MPLPipeline {}
