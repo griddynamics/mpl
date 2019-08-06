@@ -1,6 +1,8 @@
 Modular Pipeline Library
 ========================
 
+[![CircleCI](https://circleci.com/gh/griddynamics/mpl/tree/master.svg?style=shield)](https://circleci.com/gh/griddynamics/mpl)
+
 Shared jenkins library with modular structure allow to write a simple pipeline modules, test it properly and use in any kind of pipelines.
 
 ## Goals
