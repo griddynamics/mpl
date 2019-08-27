@@ -3,6 +3,10 @@ Modular Pipeline Library
 
 [![CircleCI](https://circleci.com/gh/griddynamics/mpl/tree/master.svg?style=shield)](https://circleci.com/gh/griddynamics/mpl)
 
+[![CircleCI nightly LTS](https://img.shields.io/badge/dynamic/json?label=nightly%20lts&query=%24%5B%3F%28%40.branch%20%3D%3D%20%22master%22%20%26%26%20%40.workflows.workflow_name%20%3D%3D%20%22nightly_jenkins_test%22%20%26%26%20%40.workflows.%20job_name%20%3D%3D%20%22jenkins_test-1%22%29%5D.status&url=https%3A%2F%2Fcircleci.com%2Fapi%2Fv1.1%2Fproject%2Fgh%2Fgriddynamics%2Fmpl%3Flimit%3D10)](https://circleci.com/gh/griddynamics/workflows/mpl/tree/master) - testing MPL pipeline with the current LTS Jenkins every night
+
+[![CircleCI nightly Latest](https://img.shields.io/badge/dynamic/json?label=nightly%20latest&query=%24%5B%3F%28%40.branch%20%3D%3D%20%22master%22%20%26%26%20%40.workflows.workflow_name%20%3D%3D%20%22nightly_jenkins_test%22%20%26%26%20%40.workflows.%20job_name%20%3D%3D%20%22jenkins_test-2%22%29%5D.status&url=https%3A%2F%2Fcircleci.com%2Fapi%2Fv1.1%2Fproject%2Fgh%2Fgriddynamics%2Fmpl%3Flimit%3D10)](https://circleci.com/gh/griddynamics/workflows/mpl/tree/master) - testing MPL pipeline with the current Latest Jenkins every night
+
 Shared jenkins library with modular structure allow to write a simple pipeline modules, test it properly and use in any kind of pipelines.
 
 ## Goals
