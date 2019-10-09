@@ -40,9 +40,9 @@ import org.jenkinsci.plugins.workflow.steps.FlowInterruptedException
  * @param name  used to determine the module name, by default it's current stage name (ex. "Maven Build")
  * @param cfg   module configuration to override. Will update the common module configuration
  */
-def call(String name = env.STAGE_NAME, cfg = null) {
+def call(String name = env.STAGE_NAME, cfg = null, module_name = env.STAGE_NAME) {
   if( cfg == null )
-    cfg = MPLManager.instance.moduleConfig(name)
+    cfg = MPLManager.instance.moduleConfig(module_name)
   else if( cfg instanceof MPLConfig )
     cfg = cfg.clone()
   else
