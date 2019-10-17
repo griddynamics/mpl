@@ -92,7 +92,8 @@ jobs:
           command: git clone https://github.com/rabits/jenkinsbro ~/jenkinsbro
 
       - setup_remote_docker:
-          docker_layer_caching: true
+          # CircleCI cache now not free
+          # docker_layer_caching: true
 
       - run:
           name: Build jenkins image
