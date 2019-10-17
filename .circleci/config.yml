@@ -91,7 +91,7 @@ jobs:
           name: Get the jenkinsBro repo
           command: git clone https://github.com/rabits/jenkinsbro ~/jenkinsbro
 
-      - setup_remote_docker:
+      - setup_remote_docker
           # CircleCI cache now not free
           # docker_layer_caching: true
 
