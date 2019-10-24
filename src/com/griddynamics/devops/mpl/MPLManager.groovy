@@ -23,6 +23,10 @@
 
 package com.griddynamics.devops.mpl
 
+import com.griddynamics.devops.mpl.MPLException
+import com.griddynamics.devops.mpl.MPLConfig
+import com.griddynamics.devops.mpl.Helper
+
 /**
  * Object to help with MPL pipelines configuration & poststeps
  *
@@ -94,6 +98,15 @@ class MPLManager implements Serializable {
    */
   public Boolean moduleEnabled(String name) {
     config.modules ? config.modules[name] != null : false
+  }
+
+  /**
+   * Deep merge of the pipeline config with the provided config
+   *
+   * @param cfg  Map or MPLConfig
+   */
+  public configMerge(cfg) {
+    config = Helper.mergeMaps(config, cfg)
   }
 
   /**
