@@ -158,8 +158,10 @@ public class MPLConfig implements Map, Serializable {
       else
         throw new MPLException("Invalid config key path '${key_list[i-1] = '<'+key_list[i-1]+'>'; key_list.join('.')}': marked key value type '${parent?.getClass()}' is not suitable to set the nested variable")
 
-      if( value == null )
-        value = parent[key] = [:]
+      if( value == null ) {
+        parent[key] = [:]
+        value = parent[key]
+      }
     }
 
     parent[key] = val
