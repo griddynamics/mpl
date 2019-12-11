@@ -98,7 +98,7 @@ jobs:
       - run:
           name: Build jenkins image
           command: ~/jenkinsbro/jenkinsbro_build.sh "<< parameters.jenkins_version >>"
-          no_output_timeout: 2m
+          no_output_timeout: 5m
 
       - run:
           name: Copy jenkinsbro configuration and tests
