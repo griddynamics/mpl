@@ -31,5 +31,5 @@ import com.griddynamics.devops.mpl.MPLManager
  * @see MPLManager#modulePostStep(String name, Closure body)
  */
 def call(Closure body) {
-  MPLManager.instance.modulePostStep(MPLManager.instance.getActiveModules().last(), body)
+  MPLManager.instance.modulePostStep(null, body)
 }
