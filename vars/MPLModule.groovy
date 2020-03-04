@@ -61,7 +61,6 @@ def call(String name = env.STAGE_NAME, cfg = null) {
   // Reading module definition from workspace or from the library resources
   def module_src = null
   if( MPLManager.instance.checkEnforcedModule(name)
-      && env.NODE_NAME != null
       && Helper.pathExists(project_path)
       && (! active_modules.contains(project_path)) ) {
     module_path = project_path

@@ -139,11 +139,9 @@ abstract class Helper {
    */
   @NonCPS
   static Boolean pathExists(String path) {
-    return CpsThread.current().getContextVariable(
-      FilePath.class,
-      CpsThread.current().&getExecution,
-      CpsThread.current().head.&get
-    )?.child(path)?.exists()
+    return CpsThread.current() ? CpsThread.current().getContextVariable(
+      FilePath.class, CpsThread.current().&getExecution, CpsThread.current().head.&get
+    )?.child(path)?.exists() : null
   }
 
   /**
@@ -156,11 +154,9 @@ abstract class Helper {
    */
   @NonCPS
   static String pathRead(String path) {
-    return CpsThread.current().getContextVariable(
-      FilePath.class,
-      CpsThread.current().&getExecution,
-      CpsThread.current().head.&get
-    )?.child(path)?.read()?.toString()
+    return CpsThread.current() ? CpsThread.current().getContextVariable(
+      FilePath.class, CpsThread.current().&getExecution, CpsThread.current().head.&get
+    )?.child(path)?.read()?.toString() : null
   }
 
   /**
