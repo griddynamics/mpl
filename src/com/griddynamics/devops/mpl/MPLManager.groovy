@@ -259,7 +259,7 @@ class MPLManager implements Serializable {
    *
    * @param path  Path to the module (including library if it's the library)
    *
-   * @return  String block id (used for tests)
+   * @return  String the created block id
    */
   public String pushActiveModule(String path) {
     return Helper.startMPLBlock(path)
@@ -268,9 +268,9 @@ class MPLManager implements Serializable {
   /**
    * Removing the latest active module from the list
    *
-   * @param start_id  start node ID to find in the current execution (used for tests)
+   * @param start_id  start node ID to find in the current execution
    */
-  public void popActiveModule(String start_id = null) {
+  public void popActiveModule(String start_id) {
     Helper.endMPLBlock(start_id)
   }
 }

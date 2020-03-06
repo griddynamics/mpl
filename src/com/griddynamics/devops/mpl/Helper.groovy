@@ -28,10 +28,12 @@ import java.nio.file.Paths
 import com.cloudbees.groovy.cps.NonCPS
 
 import org.jenkinsci.plugins.workflow.cps.CpsGroovyShellFactory
+import org.jenkinsci.plugins.workflow.cps.CpsFlowExecution
 import org.jenkinsci.plugins.workflow.cps.CpsThread
 import org.jenkinsci.plugins.workflow.cps.nodes.StepStartNode
 import org.jenkinsci.plugins.workflow.cps.nodes.StepEndNode
 import org.jenkinsci.plugins.workflow.actions.LabelAction
+import org.jenkinsci.plugins.workflow.actions.BodyInvocationAction
 import org.jenkinsci.plugins.workflow.cps.actions.ArgumentsActionImpl
 import org.jenkinsci.plugins.workflow.libs.LibrariesAction
 
@@ -180,14 +182,18 @@ abstract class Helper {
    */
   @NonCPS
   static String startMPLBlock(String path) {
+    def head = CpsThread.current().head
+    CpsFlowExecution.maybeAutoPersistNode(head.get())
     def node = new StepStartNode(
-      CpsThread.current().getExecution(),
+      head.getExecution(),
       Jenkins.get().getDescriptor('org.jenkinsci.plugins.workflow.steps.EchoStep'),
-      CpsThread.current().head.get()
+      head.get()
     )
+    node.addAction(new BodyInvocationAction())
     node.addAction(new LabelAction("MPL: ${pathToSimpleName(path)}"))
     node.addAction(new ArgumentsActionImpl([MPLModule:path]))
-    CpsThread.current().head.setNewHead(node)
+    head.getExecution().cacheNode(node)
+    head.setNewHead(node)
 
     return node.getId()
   }
@@ -195,15 +201,17 @@ abstract class Helper {
   /**
    * Ends the current MPL module block
    *
-   * @param start_id  start node ID to find in the current execution (used for tests)
+   * @param start_id  start node ID to find in the current execution
    */
   @NonCPS
-  static void endMPLBlock(String start_id = null) {
-    CpsThread.current().head.setNewHead(new StepEndNode(
-      CpsThread.current().getExecution(),
-      CpsThread.current().getExecution().getNode(getMPLBlocks().first().id),
-      CpsThread.current().head.get()
-    ))
+  static void endMPLBlock(String start_id) {
+    def start_node = CpsThread.current().getExecution().getNode(start_id)
+    def head = CpsThread.current().head
+    def node = new StepEndNode(head.getExecution(), start_node, head.get())
+    node.addAction(new BodyInvocationAction())
+    head.getExecution().cacheNode(node)
+    head.setNewHead(node)
+    CpsFlowExecution.maybeAutoPersistNode(node)
   }
 
   /**

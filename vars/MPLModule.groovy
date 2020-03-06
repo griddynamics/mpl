@@ -76,7 +76,6 @@ def call(String name = env.STAGE_NAME, cfg = null) {
   if( ! module_src )
     throw new MPLModuleException("Unable to find not active module to execute: ${(active_modules).join(' --> ')} -X> ${module_path}")
 
-  // Basically block_id is needed only for tests
   String block_id = MPLManager.instance.pushActiveModule(module_path)
   try {
     Helper.runModule(module_src, module_path, [CFG: cfg])
