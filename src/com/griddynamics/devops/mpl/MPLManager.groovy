@@ -23,6 +23,8 @@
 
 package com.griddynamics.devops.mpl
 
+import com.cloudbees.groovy.cps.NonCPS
+
 import com.griddynamics.devops.mpl.MPLException
 import com.griddynamics.devops.mpl.MPLConfig
 import com.griddynamics.devops.mpl.Helper
@@ -32,8 +34,18 @@ import com.griddynamics.devops.mpl.Helper
  *
  * @author Sergei Parshev <sparshev@griddynamics.com>
  */
-@Singleton
 class MPLManager implements Serializable {
+  /**
+   * Simple realization of a singleton
+   */
+  private static inst = null
+
+  public static getInstance() {
+    if( ! inst )
+      inst = new MPLManager()
+    return inst
+  }
+
   /** List of paths which is used to find modules in libraries */
   private List modulesLoadPaths = ['com/griddynamics/devops/mpl']
 
@@ -258,5 +270,23 @@ class MPLManager implements Serializable {
    */
   public popActiveModule() {
     activeModules.pop()
+  }
+
+  /**
+   * Restore the static object state if the pipeline was interrupted
+   *
+   * This function helps to make sure the MPL object will be restored
+   * if jenkins was restarted during the pipeline execution. It will
+   * work if the MPL object is stored in the pipeline:
+   *
+   * var/MPLPipeline.groovy:
+   *   ...
+   *   def MPL = MPLPipelineConfig(body, [
+   *   ...
+   */
+  @NonCPS
+  private void readObject(java.io.ObjectInputStream inp) throws IOException, ClassNotFoundException {
+    inp.defaultReadObject()
+    inst = this
   }
 }
