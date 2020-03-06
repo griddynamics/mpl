@@ -34,7 +34,7 @@ class MPLTestHelper extends PipelineTestHelper {
   public getLibraryClassLoader() {
     gse.groovyClassLoader
   }
-  
+
   void registerAllowedMethod(MethodSignature methodSignature, Closure closure) {
     if( isMethodAllowed(methodSignature.name, methodSignature.args) )
       return // Skipping methods already existing in the list

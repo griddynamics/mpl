@@ -73,20 +73,21 @@ class BuildTest extends MPLTestBase {
     assertThat(helper.callStack)
       .filteredOn { c -> c.methodName == 'tool' }
       .filteredOn { c -> c.argsToString().contains('Maven 3') }
+      .as('Maven 3 tool used')
       .isNotEmpty()
 
     assertThat(helper.callStack)
-      .as('Shell execution should contain mvn command and default clean install')
       .filteredOn { c -> c.methodName == 'sh' }
       .filteredOn { c -> c.argsToString().startsWith('mvn') }
       .filteredOn { c -> c.argsToString().contains('clean install') }
+      .as('Shell execution should contain mvn command and default clean install')
       .isNotEmpty()
 
     assertThat(helper.callStack)
-      .as('Default mvn run without settings provided')
       .filteredOn { c -> c.methodName == 'sh' }
       .filteredOn { c -> c.argsToString().startsWith('mvn') }
       .filteredOn { c -> ! c.argsToString().contains('-s ') }
+      .as('Default mvn run without settings provided')
       .isNotEmpty()
 
     assertJobStatusSuccess()
@@ -103,9 +104,9 @@ class BuildTest extends MPLTestBase {
     printCallStack()
 
     assertThat(helper.callStack)
-      .as('Changing maven tool name')
       .filteredOn { c -> c.methodName == 'tool' }
       .filteredOn { c -> c.argsToString().contains('Maven 2') }
+      .as('Changing maven tool name')
       .isNotEmpty()
 
     assertJobStatusSuccess()
@@ -122,9 +123,9 @@ class BuildTest extends MPLTestBase {
     printCallStack()
 
     assertThat(helper.callStack)
-      .as('Providing setings file should set the maven opetion')
       .filteredOn { c -> c.methodName == 'sh' }
       .filteredOn { c -> c.argsToString().contains("-s '/test-settings.xml'") }
+      .as('Providing setings file should set the maven operation')
       .isNotEmpty()
 
     assertJobStatusSuccess()

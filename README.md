@@ -217,7 +217,7 @@ When error occurs during poststeps execution - it will be printed in the log, bu
    MPLPostStep('always') {
      echo "OpenShift Deploy Decomission poststep"
    }
- 
+
    echo 'Executing Openshift Deploy process'
    ```
 2. `{NestedLib}/var/CustomPipeline.groovy`:
@@ -334,7 +334,7 @@ We fine with standard pipeline, but would like to use different deploy stage.
 * `{ProjectRepo}/Jenkinsfile`:
   ```groovy
   @Library('mpl@release') _
-  
+
   // Use default master pipeline
   MPLPipeline {}
   ```
@@ -342,10 +342,10 @@ We fine with standard pipeline, but would like to use different deploy stage.
   ```groovy
   // Any step could be here, config modification, etc.
   echo "Let's begin the deployment process!"
-  
+
   // Run original deployment from the library
   MPLModule('Deploy', CFG)
-  
+
   echo "Deployment process completed!"
   ```
 
