@@ -23,6 +23,8 @@
 
 package com.griddynamics.devops.mpl.testing
 
+import org.junit.AfterClass
+import org.junit.Before
 import com.lesfurets.jenkins.unit.BasePipelineTest
 
 import com.griddynamics.devops.mpl.MPLConfig
@@ -45,9 +47,8 @@ abstract class MPLTestBase extends BasePipelineTest {
   Map mpl_blocks = [:]
   int mpl_blocks_id_counter = 0
 
-  void setUp() throws Exception {
-    super.setUp()
-
+  @Before
+  void setupOverrides() {
     // Overriding Helper to find the right resources in the loaded libs
     Helper.metaClass.static.getModulesList = { String path ->
       def modules = []
@@ -96,13 +97,18 @@ abstract class MPLTestBase extends BasePipelineTest {
       ]
       return id.toString()
     }
-    Helper.metaClass.static.endMPLBlock = { String start_id = null ->
+    Helper.metaClass.static.endMPLBlock = { String start_id ->
       mpl_blocks[start_id.toInteger()].ended = true
     }
     Helper.metaClass.static.getMPLBlocks = { ->
       def level = getMPLModuleLevel()
       return findBlockParents(level)
     }
+  }
+
+  @AfterClass
+  static void cleanOverrides() {
+    GroovySystem.metaClassRegistry.removeMetaClass(Helper.class)
   }
 
   // Using stacktrace to determine the nesting level of the module
