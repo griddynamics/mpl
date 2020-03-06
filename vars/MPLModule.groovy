@@ -50,6 +50,7 @@ def call(String name = env.STAGE_NAME, cfg = null) {
   
   // Trace of the running modules to find loops
   // Also to make ability to use lib module from overridden one
+  // TODO: replace getActiveModules() to Helper.getMPLBlocks()
   def active_modules = MPLManager.instance.getActiveModules()
 
   // Determining the module source file and location
@@ -59,9 +60,11 @@ def call(String name = env.STAGE_NAME, cfg = null) {
 
   // Reading module definition from workspace or from the library resources
   def module_src = null
-  if( MPLManager.instance.checkEnforcedModule(name) && env.NODE_NAME != null && fileExists(project_path) && (! active_modules.contains(project_path)) ) {
+  if( MPLManager.instance.checkEnforcedModule(name)
+      && Helper.pathExists(project_path)
+      && (! active_modules.contains(project_path)) ) {
     module_path = project_path
-    module_src = readFile(project_path)
+    module_src = Helper.pathRead(project_path)
   } else {
     // Searching for the not executed module from the loaded libraries
     module_src = Helper.getModulesList(module_path).find { it ->
@@ -73,8 +76,8 @@ def call(String name = env.STAGE_NAME, cfg = null) {
   if( ! module_src )
     throw new MPLModuleException("Unable to find not active module to execute: ${(active_modules).join(' --> ')} -X> ${module_path}")
 
+  String block_id = MPLManager.instance.pushActiveModule(module_path)
   try {
-    MPLManager.instance.pushActiveModule(module_path)
     Helper.runModule(module_src, module_path, [CFG: cfg])
   }
   catch( FlowInterruptedException ex ) {
@@ -88,8 +91,8 @@ def call(String name = env.STAGE_NAME, cfg = null) {
     throw newex
   }
   finally {
-    MPLManager.instance.modulePostStepsRun(module_path)
-    def errors = MPLManager.instance.getPostStepsErrors(module_path)
+    MPLManager.instance.modulePostStepsRun()
+    def errors = MPLManager.instance.getPostStepsErrors()
     if( errors ) {
       for( def e in errors )
         println "Module '${name}' got error during execution of poststep from module '${e.module}': ${e.error}"
@@ -97,6 +100,6 @@ def call(String name = env.STAGE_NAME, cfg = null) {
       newex.setStackTrace(Helper.getModuleStack(newex))
       throw newex
     }
-    MPLManager.instance.popActiveModule()
+    MPLManager.instance.popActiveModule(block_id)
   }
 }

@@ -67,13 +67,11 @@ class MPLManager implements Serializable {
   /** List of modules available on project side while enforcement */
   private List enforcedModules = []
 
-  /** List of currently executed modules */
-  private List activeModules = []
-
   /**
    * Initialization for the MPL manager
    *
    * @param pipelineConfig  Map with common configuration and specific modules configs
+   *
    * @return  MPLManager singleton object
    */
   public init(pipelineConfig = null) {
@@ -106,6 +104,7 @@ class MPLManager implements Serializable {
    * Determine is module exists in the configuration or not
    *
    * @param name  module name
+   *
    * @return  Boolean about existing the module
    */
   public Boolean moduleEnabled(String name) {
@@ -125,19 +124,23 @@ class MPLManager implements Serializable {
   public void postStep(String name, Closure body) {
     // TODO: Parallel execution - could be dangerous
     if( ! postSteps[name] ) postSteps[name] = []
-    postSteps[name] << [module: getActiveModules()?.last(), body: body]
+    postSteps[name] << [block: Helper.getMPLBlocks()?.first(), body: body]
   }
 
   /**
    * Add module post step to the list
    *
-   * @param name  Module poststeps list name
+   * @param name  Module poststeps list name (default: current "module(id)")
    * @param body  Definition of steps to include in the list
    */
   public void modulePostStep(String name, Closure body) {
+    if( name == null ) {
+      def block = Helper.getMPLBlocks().first()
+      name = "${block.module}(${block.id})"
+    }
     // TODO: Parallel execution - could be dangerous
     if( ! modulePostSteps[name] ) modulePostSteps[name] = []
-    modulePostSteps[name] << [module: getActiveModules()?.last(), body: body]
+    modulePostSteps[name] << [block: Helper.getMPLBlocks()?.first(), body: body]
   }
 
   /**
@@ -149,10 +152,11 @@ class MPLManager implements Serializable {
     if( postSteps[name] ) {
       for( def i = postSteps[name].size()-1; i >= 0 ; i-- ) {
         try {
-          postSteps[name][i]['body']()
+          postSteps[name][i].body()
         }
         catch( ex ) {
-          postStepError(name, postSteps[name][i]['module'], ex)
+          def module_name = "${modulePostSteps[name][i].block?.module}(${modulePostSteps[name][i].block?.id})"
+          postStepError(name, module_name, ex)
         }
       }
     }
@@ -161,16 +165,21 @@ class MPLManager implements Serializable {
   /**
    * Execute module post steps filled by module in reverse order
    *
-   * @param name  Module poststeps list name
+   * @param name  Module poststeps list name (default: current "module(id)")
    */
-  public void modulePostStepsRun(String name) {
+  public void modulePostStepsRun(String name = null) {
+    if( name == null ) {
+      def block = Helper.getMPLBlocks().first()
+      name = "${block.module}(${block.id})"
+    }
     if( modulePostSteps[name] ) {
       for( def i = modulePostSteps[name].size()-1; i >= 0 ; i-- ) {
         try {
-          modulePostSteps[name][i]['body']()
+          modulePostSteps[name][i].body()
         }
         catch( ex ) {
-          postStepError(name, modulePostSteps[name][i]['module'], ex)
+          def module_name = "${modulePostSteps[name][i].block?.module}(${modulePostSteps[name][i].block?.id})"
+          postStepError(name, module_name, ex)
         }
       }
     }
@@ -187,14 +196,19 @@ class MPLManager implements Serializable {
     if( ! postStepsErrors[name] ) postStepsErrors[name] = []
     postStepsErrors[name] << [module: module, error: exception]
   }
-  
+
   /**
    * Get the list of errors become while poststeps execution
    *
-   * @param name  Poststeps list name
+   * @param name  Poststeps list name (default: current "module(id)")
+   *
    * @return  List of errors
    */
-  public List getPostStepsErrors(String name) {
+  public List getPostStepsErrors(String name = null) {
+    if( name == null ) {
+      def block = Helper.getMPLBlocks().first()
+      name = "${block.module}(${block.id})"
+    }
     postStepsErrors[name] ?: []
   }
 
@@ -240,27 +254,40 @@ class MPLManager implements Serializable {
 
   /**
    * Get list of currently executing modules
+   * Last item is the current one
    *
    * @return  List of modules paths
+   *
+   * @deprecated - old function, now works with the current thread, but it's
+   *               better to switch to Helper.getMPLBlocks() - it gives more
+   *               info about the currently executed modules
    */
-  public getActiveModules() {
-    activeModules
+  @Deprecated // https://github.com/griddynamics/mpl/issues/54
+  public List getActiveModules() {
+    def blocks = Helper.getMPLBlocks()
+    for( def i = 0; i < blocks.size(); i++ )
+      blocks[i] = blocks[i].module
+    return blocks.reverse()
   }
 
   /**
    * Add active module to the stack-list
    *
    * @param path  Path to the module (including library if it's the library)
+   *
+   * @return  String the created block id
    */
-  public pushActiveModule(String path) {
-    activeModules += path
+  public String pushActiveModule(String path) {
+    return Helper.startMPLBlock(path)
   }
 
   /**
    * Removing the latest active module from the list
+   *
+   * @param start_id  start node ID to find in the current execution
    */
-  public popActiveModule() {
-    activeModules.pop()
+  public void popActiveModule(String start_id) {
+    Helper.endMPLBlock(start_id)
   }
 
   /**
