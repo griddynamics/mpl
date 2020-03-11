@@ -112,6 +112,15 @@ class MPLManager implements Serializable {
   }
 
   /**
+   * Deep merge of the pipeline config with the provided config
+   *
+   * @param cfg  Map or MPLConfig
+   */
+  public configMerge(cfg) {
+    config = Helper.mergeMaps(config, cfg)
+  }
+
+  /**
    * Add post step to the array with specific name
    *
    * @param name  Poststeps list name

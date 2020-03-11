@@ -41,6 +41,9 @@ import hudson.model.Run
 import hudson.FilePath
 import jenkins.model.Jenkins
 
+import com.griddynamics.devops.mpl.MPLManager
+import com.griddynamics.devops.mpl.MPLException
+
 /**
  * Manages all helpers to interact with low-level groovy
  *
@@ -293,17 +296,5 @@ abstract class Helper {
         return s.getLineNumber()
     }
     return null
-  }
-
-  /**
-   * Special function to return exception if someone tries to use MPLConfig in a wrong way
-   * Basically used just to be overridden on the unit tests side.
-   *
-   * @param config  current MPLConfig configuration
-   *
-   * @return  Set of entries - but only when overridden by unit tests
-   */
-  static Set configEntrySet(Map config) {
-    throw new MPLException('Forbidden to iterate over MPLConfig')
   }
 }

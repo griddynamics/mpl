@@ -35,7 +35,7 @@ class MPLConfigTest {
 
   @Before
   void setUp() throws Exception {
-    this.CFG = new MPLConfig([
+    this.CFG = MPLConfig.create([
       first1_level: [
         second1_level: [
           third1_value: 5,

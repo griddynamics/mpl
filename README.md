@@ -64,7 +64,7 @@ You can use MPL in 3 different ways - it's 3 layers of the library:
 ### Jenkinsfile / Pipeline script
 
 Just two lines to use default Master pipeline in your project Jenkinsfile or in the Jenkins Pipeline Script:
-```
+```groovy
 @Library('mpl@release') _
 MPLPipeline {}
 ```
@@ -86,7 +86,7 @@ Usually configuration is initialized in the pipeline - it's calling `MPLPipeline
 * `defaults` - pipeline default values (could be overridden by Jenkinsfile)
 * `overrides` - pipeline hard values (could not be overridden by Jenkinsfile)
 
-After that pipeline defining MPL object and use it's common functions to define the pipeline itself. Pipeline is calling MPLModule that calling the required module logic.
+After that pipeline defining MPL object and use it's common functions to define the pipeline itself. Pipeline is calling `MPLModule` that calling the required module logic.
 
 In the module we have a common predefined variables (like default `steps`, `env`, `params`, `currentBuild`...) and a new variable contains the pipeline/module configs: `CFG`.
 It's a special MPLConfig object that defines interface to get and set the properties. It's promising a number of things:
@@ -99,7 +99,7 @@ It's a special MPLConfig object that defines interface to get and set the proper
   * set sublevels for defined non-collections
 
 Use of the `CFG` object is quite simple. Imagine we have the next pipeline configuration:
-```
+```groovy
 [
   agent_label: '',
   val1: 4,
@@ -131,6 +131,24 @@ Use of the `CFG` object is quite simple. Imagine we have the next pipeline confi
   * `CFG.val2 = [new_key:[4,3,2,1]]`; `CFG.val2` == `[new_key:[4,3,2,1]]`
 
 So you got the point - hopefully this will be helpful and will allow you to create the great interfaces for your modules.
+
+### MPLModule return
+
+`MPLModule` step running the specified module with `CFG` configuration and returns `OUT` configuration.
+`OUT` is always empty when a module just started and could be modified inside the module. So:
+* you can set some variable like "Module/SomeModule.groovy":
+```groovy
+OUT.'artifact.version' = 1
+```
+* and use it in parent module as:
+```groovy
+def version = MPLModule('Some Module').'artifact.version'
+echo "${version}"
+```
+
+To modify the pipeline config with the module output - just use `MPLPipelineConfigMerge` step - we
+recommend to use it only in the pipeline step specification to concentrate any pipeline-related
+changes in the pipeline definition itself.
 
 ### Modules
 
@@ -178,7 +196,7 @@ If module post step fails - it's fatal for the module, so the pipeline will fail
 for the module will be executed and errors will be printed, but module will fail.
 
 `{NestedLibModules}/Build/MavenBuild.groovy`:
-```
+```groovy
 MPLModulePostStep {
   junit 'target/junitReport/*.xml'
 }
@@ -195,7 +213,7 @@ to execute it and usually placed in the pipeline post actions.
 When error occurs during poststeps execution - it will be printed in the log, but status of pipeline will not be affected.
 
 1. `{NestedLibModules}/Deploy/OpenshiftDeploy.groovy`:
-   ```
+   ```groovy
    MPLPostStep('always') {
      echo "OpenShift Deploy Decomission poststep"
    }
@@ -203,19 +221,19 @@ When error occurs during poststeps execution - it will be printed in the log, bu
    echo 'Executing Openshift Deploy process'
    ```
 2. `{NestedLib}/var/CustomPipeline.groovy`:
-   ```
+   ```groovy
    def call(body) {
-     ...
+     // ...
      pipeline {
-       ...
+       // ...
        stages {
-         ...
+         // ...
          stage( 'Openshift Deploy' ) {
            steps {
              MPLModule()
            }
          }
-         ...
+         // ...
        }
        post {
          always {
@@ -237,13 +255,13 @@ When error occurs during poststeps execution - it will be printed in the log, bu
 To make sure that some of your stages will be executed for sure - you can add a list of modules that could be overrided on the project side.
 Just make sure, that you executing function `MPLEnforce` and provide list of modules that could be overriden in your pipeline script:
 Jenkins job script:
-```
+```groovy
 @Library('mpl@release') _
 
 // Only 'Build Maven' & 'Deploy' modules could be overriden on the project side
 MPLEnforce(['Build Maven', 'Deploy'])
 
-... // Your enforced pipeline
+// ... Your enforced pipeline
 ```
 Notices:
 * The function `MPLEnforce` could be executed only once, after that it will ignore any further executions.
@@ -256,7 +274,7 @@ MPL supporting the nested libraries to simplify work for a big teams which would
 Basically you just need to provide your `vars` interfaces and specify the mpl library to use it:
 
 * `{NestedLib}/vars/MPLInit.groovy`:
-  ```
+  ```groovy
   def call() {
     // Using the latest release MPL and adding the custom path to find modules
     library('mpl@release')
@@ -264,10 +282,10 @@ Basically you just need to provide your `vars` interfaces and specify the mpl li
   }
   ```
 * `{NestedLib}/vars/NestedPipeline.groovy`:
-  ```
+  ```groovy
   def call(body) {
     MPLInit() // Init the MPL library
-    ...       // Specifying the configs / pipelines and using modules etc.
+    // ... Specifying the configs / pipelines and using modules etc.
   }
   ```
 
@@ -296,7 +314,7 @@ Please check the wiki page to see some MPL examples: [MPL Wiki](https://github.c
 If we fine with standard pipeline, but need to slightly modify options.
 
 `{ProjectRepo}/Jenkinsfile`:
-```
+```groovy
 @Library('mpl@release') _
 
 // Use default master pipeline
@@ -314,14 +332,14 @@ MPLPipeline {
 We fine with standard pipeline, but would like to use different deploy stage.
 
 * `{ProjectRepo}/Jenkinsfile`:
-  ```
+  ```groovy
   @Library('mpl@release') _
 
   // Use default master pipeline
   MPLPipeline {}
   ```
 * `{ProjectRepo}/.jenkins/modules/Deploy/Deploy.groovy`:
-  ```
+  ```groovy
   // Any step could be here, config modification, etc.
   echo "Let's begin the deployment process!"
 
@@ -334,7 +352,7 @@ We fine with standard pipeline, but would like to use different deploy stage.
 ### Custom Declarative Pipeline with mixed steps
 
 `{ProjectRepo}/Jenkinsfile`:
-```
+```groovy
 @Library('mpl@release') _
 
 pipeline {  // Declarative pipeline
@@ -371,7 +389,7 @@ pipeline {  // Declarative pipeline
 ### Using nested library (based on MPL)
 
 `{ProjectRepo}/Jenkinsfile`:
-```
+```groovy
 @Library('nested-mpl@release') _
 
 NestedPipeline {

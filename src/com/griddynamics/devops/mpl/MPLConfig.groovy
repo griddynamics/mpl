@@ -24,6 +24,8 @@
 package com.griddynamics.devops.mpl
 
 import com.cloudbees.groovy.cps.NonCPS
+import com.griddynamics.devops.mpl.Helper
+import com.griddynamics.devops.mpl.MPLException
 
 /**
  * Configuration object to provide the config interface
@@ -46,7 +48,7 @@ public class MPLConfig implements Map, Serializable {
    * @return  MPLConfig object
    */
   @NonCPS
-  static public MPLConfig create(cfg) {
+  static public MPLConfig create(cfg = [:]) {
     new MPLConfig(cfg)
   }
 
@@ -70,8 +72,8 @@ public class MPLConfig implements Map, Serializable {
   }
 
   /**
-   * It's forbidden to use the MPLConfig as a regular Map.
-   * CFG is just a config place, you can't iterate over it.
+   * It's not recommended to use the MPLConfig as a regular Map.
+   * CFG is just a config place.
    * The module should know the key it's trying to use, not to process everything.
    */
   public Object remove(Object key) {}
