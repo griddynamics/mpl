@@ -158,7 +158,7 @@ abstract class Helper {
   static String pathRead(String path) {
     return CpsThread.current() ? CpsThread.current().getContextVariable(
       FilePath.class, CpsThread.current().&getExecution, CpsThread.current().head.&get
-    )?.child(path)?.read()?.toString() : null
+    )?.child(path)?.read()?.getText() : null
   }
 
   /**
