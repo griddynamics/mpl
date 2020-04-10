@@ -89,7 +89,7 @@ Usually configuration is initialized in the pipeline - it's calling `MPLPipeline
 After that pipeline defining MPL object and use it's common functions to define the pipeline itself. Pipeline is calling `MPLModule` that calling the required module logic.
 
 In the module we have a common predefined variables (like default `steps`, `env`, `params`, `currentBuild`...) and a new variable contains the pipeline/module configs: `CFG`.
-It's a special MPLConfig object that defines interface to get and set the properties. It's promising a number of things:
+It's a special `MPLConfig` object that defines interface to get and set the properties. It's promising a number of things:
 * Get value will never throw exception
 * Unable to change values of `CFG` through get or clone
 * It's not related to the parent module or pipeline `CFG` - any changes could be only forwarded to the children module
@@ -97,6 +97,11 @@ It's a special MPLConfig object that defines interface to get and set the proper
 * Set of the `CFG` value could cause exceptions in certain circumstances:
   * set improper List index (non-positive integer)
   * set sublevels for defined non-collections
+
+`MPLConfig` object is not the usual `Map` - you have to use it with known key you defined before.
+That was introduced to make sure you will see what kind of configuration is used or required on each
+stage. So you will need to use it as `def a = CFG.really_needed_data` instead of just `def a = CFG`
+or `for( a in CFG ) println(a)` which will tell you much more useful information and simplify debug.
 
 Use of the `CFG` object is quite simple. Imagine we have the next pipeline configuration:
 ```groovy
@@ -137,18 +142,31 @@ So you got the point - hopefully this will be helpful and will allow you to crea
 `MPLModule` step running the specified module with `CFG` configuration and returns `OUT` configuration.
 `OUT` is always empty when a module just started and could be modified inside the module. So:
 * you can set some variable like "Module/SomeModule.groovy":
-```groovy
-OUT.'artifact.version' = 1
-```
-* and use it in parent module as:
-```groovy
-def version = MPLModule('Some Module').'artifact.version'
-echo "${version}"
-```
+  ```groovy
+  OUT.'artifact.version' = 1
+  ```
+* and use it in parent module "Module/Module.groovy" as:
+  ```groovy
+  def version = MPLModule('Some Module').'artifact.version'
+  echo "${version}"
+  OUT.'artifact_info.artifact.version' = version
+  ```
 
 To modify the pipeline config with the module output - just use `MPLPipelineConfigMerge` step - we
 recommend to use it only in the pipeline step specification to concentrate any pipeline-related
 changes in the pipeline definition itself.
+
+You can use `MPLPipelineConfigMerge` in the pipeline like this - the logic will put `artifact` key
+with value `[version: 1]` in the global configuration and you will be able to use
+`CFG.'artifact.version' in the following modules:
+```groovy
+pipeline {
+    ...
+    steps {
+        MPLPipelineConfigMerge(MPLModule('Some Module').artifact_info)
+    }
+    ...
+```
 
 ### Modules
 
@@ -195,15 +213,15 @@ Could be useful when you need to collect reports or clean stage agent before it 
 If module post step fails - it's fatal for the module, so the pipeline will fail (unlike general poststeps). All the poststeps
 for the module will be executed and errors will be printed, but module will fail.
 
-`{NestedLibModules}/Build/MavenBuild.groovy`:
-```groovy
-MPLModulePostStep {
-  junit 'target/junitReport/*.xml'
-}
+* `{NestedLibModules}/Build/MavenBuild.groovy`:
+  ```groovy
+  MPLModulePostStep {
+    junit 'target/junitReport/*.xml'
+  }
 
-// Could fail but our poststep will be executed
-MPLModule('Maven Build', CFG)
-```
+  // Could fail but our poststep will be executed
+  MPLModule('Maven Build', CFG)
+  ```
 
 #### MPLPostStep
 
@@ -213,56 +231,57 @@ to execute it and usually placed in the pipeline post actions.
 When error occurs during poststeps execution - it will be printed in the log, but status of pipeline will not be affected.
 
 1. `{NestedLibModules}/Deploy/OpenshiftDeploy.groovy`:
-   ```groovy
-   MPLPostStep('always') {
-     echo "OpenShift Deploy Decomission poststep"
-   }
+  ```groovy
+  MPLPostStep('always') {
+    echo "OpenShift Deploy Decomission poststep"
+  }
 
-   echo 'Executing Openshift Deploy process'
-   ```
+  echo 'Executing Openshift Deploy process'
+  ```
 2. `{NestedLib}/var/CustomPipeline.groovy`:
-   ```groovy
-   def call(body) {
-     // ...
-     pipeline {
-       // ...
-       stages {
-         // ...
-         stage( 'Openshift Deploy' ) {
-           steps {
-             MPLModule()
-           }
-         }
-         // ...
-       }
-       post {
-         always {
-           MPLPostStepsRun('always')
-         }
-         success {
-           MPLPostStepsRun('success')
-         }
-         failure {
-           MPLPostStepsRun('failure')
-         }
-       }
-     }
-   }
-   ```
+  ```groovy
+  def call(body) {
+    // ...
+    pipeline {
+      // ...
+      stages {
+        // ...
+        stage( 'Openshift Deploy' ) {
+          steps {
+            MPLModule()
+          }
+        }
+        // ...
+      }
+      post {
+        always {
+          MPLPostStepsRun('always')
+        }
+        success {
+          MPLPostStepsRun('success')
+        }
+        failure {
+          MPLPostStepsRun('failure')
+        }
+      }
+    }
+  }
+  ```
 
 ### Enforcing modules
 
 To make sure that some of your stages will be executed for sure - you can add a list of modules that could be overrided on the project side.
 Just make sure, that you executing function `MPLEnforce` and provide list of modules that could be overriden in your pipeline script:
-Jenkins job script:
-```groovy
-@Library('mpl@release') _
+* Jenkins job script:
+  ```groovy
+  @Library('mpl@release') _
 
-// Only 'Build Maven' & 'Deploy' modules could be overriden on the project side
-MPLEnforce(['Build Maven', 'Deploy'])
+  // Only 'Build Maven' & 'Deploy' modules could be overriden on the project side
+  MPLEnforce(['Build Maven', 'Deploy'])
 
-// ... Your enforced pipeline
-```
+  // ... Your enforced pipeline
+  ```
+
 Notices:
 * The function `MPLEnforce` could be executed only once, after that it will ignore any further executions.
 * This trick is really working only if you controlling the job pipeline scripts, with Jenkinsfile it's not so secure.
@@ -313,19 +332,19 @@ Please check the wiki page to see some MPL examples: [MPL Wiki](https://github.c
 
 If we fine with standard pipeline, but need to slightly modify options.
 
-`{ProjectRepo}/Jenkinsfile`:
-```groovy
-@Library('mpl@release') _
+* `{ProjectRepo}/Jenkinsfile`:
+  ```groovy
+  @Library('mpl@release') _
 
-// Use default master pipeline
-MPLPipeline {
-  // Pipeline configuration override here
-  // Example: (check available options in the pipeline definition)
-  agent_label = 'LS'                     // Set agent label
-  modules.Build.tool_version = 'Maven 2' // Change tool for build stage
-  modules.Test = null                    // Disable Test stage
-}
-```
+  // Use default master pipeline
+  MPLPipeline {
+    // Pipeline configuration override here
+    // Example: (check available options in the pipeline definition)
+    agent_label = 'LS'                     // Set agent label
+    modules.Build.tool_version = 'Maven 2' // Change tool for build stage
+    modules.Test = null                    // Disable Test stage
+  }
+  ```
 
 ### Use Standard Pipeline but with custom module
 
@@ -351,51 +370,51 @@ We fine with standard pipeline, but would like to use different deploy stage.
 
 ### Custom Declarative Pipeline with mixed steps
 
-`{ProjectRepo}/Jenkinsfile`:
-```groovy
-@Library('mpl@release') _
+* `{ProjectRepo}/Jenkinsfile`:
+  ```groovy
+  @Library('mpl@release') _
 
-pipeline {  // Declarative pipeline
-  agent {
-    label 'LS'
-  }
-  stages {
-    stage( 'Build' ) {
-      parallel {        // Parallel build for 2 subprojects
-        stage( 'Build Project A' ) {
-          steps {
-            dir( 'subProjectA' ) {
-              MPLModule('Maven Build', [ // Using common Maven Build with specified configs
-                tool_version: 'Maven 2'
-              ])
+  pipeline {  // Declarative pipeline
+    agent {
+      label 'LS'
+    }
+    stages {
+      stage( 'Build' ) {
+        parallel {        // Parallel build for 2 subprojects
+          stage( 'Build Project A' ) {
+            steps {
+              dir( 'subProjectA' ) {
+                MPLModule('Maven Build', [ // Using common Maven Build with specified configs
+                  tool_version: 'Maven 2'
+                ])
+              }
             }
           }
-        }
-        stage( 'Build Project B' ) {
-          steps {
-            dir( 'subProjectB' ) {
-              // Custom build process (it's better to put it into the project custom module)
-              sh 'gradle build'
-              sh 'cp -a target my_data'
+          stage( 'Build Project B' ) {
+            steps {
+              dir( 'subProjectB' ) {
+                // Custom build process (it's better to put it into the project custom module)
+                sh 'gradle build'
+                sh 'cp -a target my_data'
+              }
             }
           }
         }
       }
     }
   }
-}
-```
+  ```
 
 ### Using nested library (based on MPL)
 
-`{ProjectRepo}/Jenkinsfile`:
-```groovy
-@Library('nested-mpl@release') _
+* `{ProjectRepo}/Jenkinsfile`:
+  ```groovy
+  @Library('nested-mpl@release') _
 
-NestedPipeline {
-  // config here
-}
-```
+  NestedPipeline {
+    // config here
+  }
+  ```
 
 ## Contribution
 
