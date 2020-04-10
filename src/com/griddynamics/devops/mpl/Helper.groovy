@@ -297,4 +297,16 @@ abstract class Helper {
     }
     return null
   }
+
+  /**
+   * Special function to return exception if someone tries to use MPLConfig in a wrong way
+   * Basically used just to be overridden on the unit tests side.
+   *
+   * @param config  current MPLConfig configuration
+   *
+   * @return  Set of entries - but only when overridden by unit tests
+   */
+  static Set configEntrySet(Map config) {
+    throw new MPLException('Forbidden to iterate over MPLConfig, please use some specific key with a good self-describable name')
+  }
 }
