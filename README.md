@@ -65,7 +65,7 @@ You can use MPL in 3 different ways - it's 3 layers of the library:
 
 Just two lines to use default Master pipeline in your project Jenkinsfile or in the Jenkins Pipeline Script:
 ```groovy
-@Library('mpl@release') _
+@Library('mpl') _
 MPLPipeline {}
 ```
 
@@ -274,7 +274,7 @@ To make sure that some of your stages will be executed for sure - you can add a 
 Just make sure, that you executing function `MPLEnforce` and provide list of modules that could be overriden in your pipeline script:
 * Jenkins job script:
   ```groovy
-  @Library('mpl@release') _
+  @Library('mpl') _
 
   // Only 'Build Maven' & 'Deploy' modules could be overriden on the project side
   MPLEnforce(['Build Maven', 'Deploy'])
@@ -296,7 +296,7 @@ Basically you just need to provide your `vars` interfaces and specify the mpl li
   ```groovy
   def call() {
     // Using the latest release MPL and adding the custom path to find modules
-    library('mpl@release')
+    library('mpl')
     MPLModulesPath('com/yourcompany/mpl')
   }
   ```
@@ -334,7 +334,7 @@ If we fine with standard pipeline, but need to slightly modify options.
 
 * `{ProjectRepo}/Jenkinsfile`:
   ```groovy
-  @Library('mpl@release') _
+  @Library('mpl') _
 
   // Use default master pipeline
   MPLPipeline {
@@ -352,7 +352,7 @@ We fine with standard pipeline, but would like to use different deploy stage.
 
 * `{ProjectRepo}/Jenkinsfile`:
   ```groovy
-  @Library('mpl@release') _
+  @Library('mpl') _
 
   // Use default master pipeline
   MPLPipeline {}
@@ -372,7 +372,7 @@ We fine with standard pipeline, but would like to use different deploy stage.
 
 * `{ProjectRepo}/Jenkinsfile`:
   ```groovy
-  @Library('mpl@release') _
+  @Library('mpl') _
 
   pipeline {  // Declarative pipeline
     agent {
@@ -409,7 +409,7 @@ We fine with standard pipeline, but would like to use different deploy stage.
 
 * `{ProjectRepo}/Jenkinsfile`:
   ```groovy
-  @Library('nested-mpl@release') _
+  @Library('nested-mpl') _
 
   NestedPipeline {
     // config here
