@@ -40,14 +40,15 @@ class BuildTest extends MPLTestBase {
   @Override
   @Before
   void setUp() throws Exception {
-    String buildFolderBase = this.class.getResource('.').getPath().split('classes')[0]
-    String sharedLibsPath = Paths.get(buildFolderBase, 'libs')
+    String sharedLibs = this.class.getResource('.').getFile()
+
+    println("sharedLibs: ${sharedLibs}")
 
     helper.registerSharedLibrary(library()
         .name('mpl')
         .allowOverride(false)
-        .retriever(localSource(sharedLibsPath))
-        .targetPath(sharedLibsPath)
+        .retriever(localSource(sharedLibs))
+        .targetPath(sharedLibs)
         .defaultVersion('snapshot')
         .implicit(true)
         .build()

@@ -63,8 +63,8 @@ task prepareForTests(type: Copy) {
         include 'build.gradle'
         include 'settings.gradle'
     }
-    //into "${buildDir}/classes/${project.name}@snapshot"
-    into "${buildDir}/libs/${project.name}@snapshot"
+    // TODO: try to come up with a more elegant way of doing this - it's like that to avoid completely breaking maven support
+    into "${buildDir}/classes/groovy/test/${project.name}@snapshot"
 }
 
 test {
