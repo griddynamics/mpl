@@ -2,7 +2,7 @@
  * Common build module
  */
 
-if ( fileExists('build.grade')) {
+if ( fileExists('build.gradle')) {
   MPLModule('Gradle Build', CFG)
 } else {
   MPLModule('Maven Build', CFG)
