@@ -133,7 +133,8 @@ class MPLManager implements Serializable {
   public void postStep(String name, Closure body) {
     // TODO: Parallel execution - could be dangerous
     if( ! postSteps[name] ) postSteps[name] = []
-    postSteps[name] << [block: Helper.getMPLBlocks()?.first(), body: body]
+    def blocks = Helper.getMPLBlocks()
+    postSteps[name] << [block: blocks ? blocks.first() : null, body: body]
   }
 
   /**
@@ -149,7 +150,7 @@ class MPLManager implements Serializable {
     }
     // TODO: Parallel execution - could be dangerous
     if( ! modulePostSteps[name] ) modulePostSteps[name] = []
-    modulePostSteps[name] << [block: Helper.getMPLBlocks()?.first(), body: body]
+    modulePostSteps[name] << [block: Helper.getMPLBlocks().first(), body: body]
   }
 
   /**
