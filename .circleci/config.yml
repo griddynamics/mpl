@@ -111,7 +111,8 @@ jobs:
       - run:
           name: Run jenkins and mpl tests
           command: >
-            docker run -e "MPL_VERSION=${CIRCLE_SHA1}"
+            docker run -e "MPL_VERSION=$(echo "${CIRCLE_BRANCH}" | sed 's|\(pull/[0-9]*\)|\1/head|g')"
+            -e "MPL_REFSPEC=$(echo "${CIRCLE_BRANCH}:remotes/origin/${CIRCLE_BRANCH}" | sed 's|\(pull/[0-9]*\)|\1/head|g')"
             -e "MPL_CLONE_URL=$(echo "${CIRCLE_REPOSITORY_URL}" | sed 's|git@github.com:|https://github.com/|')"
             --name jenkins --rm -it --volumes-from jenkins-home jenkinsbro-master
           no_output_timeout: 5m
