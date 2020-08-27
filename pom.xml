@@ -28,6 +28,13 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <jenkins.version>2.204.2</jenkins.version>
+        <jenkins-core.version>${jenkins.version}</jenkins-core.version>
+        <jenkins-war.version>${jenkins.version}</jenkins-war.version>
+        <jenkins-test-harness.version>2.62</jenkins-test-harness.version>
+        <workflow-cps.version>2.80</workflow-cps.version>
+        <argLine>-Xms768M -Xmx768M -Djava.awt.headless=true -XX:+HeapDumpOnOutOfMemoryError -XX:+TieredCompilation -XX:TieredStopAtLevel=1</argLine>
+        <slf4jVersion>1.7.25</slf4jVersion>
     </properties>
 
     <repositories>
@@ -46,17 +53,30 @@
         <dependency>
             <groupId>org.jenkins-ci.main</groupId>
             <artifactId>jenkins-core</artifactId>
-            <version>2.73.3</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins.workflow</groupId>
-            <artifactId>workflow-cps-global-lib</artifactId>
-            <version>2.8</version>
+            <version>${jenkins-core.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-cps</artifactId>
-            <version>2.44</version>
+            <version>${workflow-cps.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins.workflow</groupId>
+            <artifactId>workflow-cps-global-lib</artifactId>
+            <version>2.15</version>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>3.14.0</version>
+            <scope>test</scope>
         </dependency>
 
         <dependency>
@@ -65,11 +85,62 @@
             <version>1.1</version>
             <scope>test</scope>
         </dependency>
+
+        <!-- Tests JenkinsRule base class -->
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.12</version>
+            <groupId>org.jenkins-ci.main</groupId>
+            <artifactId>jenkins-test-harness</artifactId>
+            <version>${jenkins-test-harness.version}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.main</groupId>
+            <artifactId>jenkins-war</artifactId>
+            <version>${jenkins-war.version}</version>
+            <type>war</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins.workflow</groupId>
+            <artifactId>workflow-job</artifactId>
+            <version>2.36</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Unit tests additional requirements -->
+        <dependency>
+            <groupId>org.jenkins-ci.plugins.workflow</groupId>
+            <artifactId>workflow-basic-steps</artifactId>
+            <version>2.19</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-api</artifactId>
+          <version>${slf4jVersion}</version>
+          <scope>test</scope>
+          <!-- mark the API as optional so it is not packaged in the HPI but available during compile -->
+          <optional>true</optional>
+        </dependency>
+        <!-- make slf4j bindings to java.util.logging available during tests -->
+        <dependency>
+          <groupId>org.slf4j</groupId>
+          <artifactId>log4j-over-slf4j</artifactId>
+          <version>${slf4jVersion}</version>
+          <scope>test</scope>
+        </dependency>
+        <dependency>
+          <groupId>org.slf4j</groupId>
+          <artifactId>jcl-over-slf4j</artifactId>
+          <version>${slf4jVersion}</version>
+          <scope>test</scope>
+        </dependency>
+        <dependency>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-jdk14</artifactId>
+          <version>${slf4jVersion}</version>
+          <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -103,19 +174,21 @@
                 </executions>
             </plugin>
 
-            <!-- Tests -->
             <plugin>
                 <groupId>org.codehaus.gmavenplus</groupId>
                 <artifactId>gmavenplus-plugin</artifactId>
-                <version>1.7.1</version>
+                <version>1.8.1</version>
                 <executions>
                     <execution>
                         <goals>
-                            <goal>addSources</goal>
-                            <goal>addTestSources</goal>
-                            <goal>generateStubs</goal>
+                            <!--goal>addSources</goal-->
+                            <!--goal>addTestSources</goal-->
+                            <!--goal>generateStubs</goal-->
+                            <goal>generateTestStubs</goal>
                             <goal>compile</goal>
                             <goal>compileTests</goal>
+                            <!--goal>removeStubs</goal-->
+                            <goal>removeTestStubs</goal>
                             <goal>groovydoc</goal>
                             <goal>groovydocTests</goal>
                         </goals>
@@ -124,9 +197,9 @@
                 <configuration>
                     <sources>
                         <source>
-                            <directory>${project.basedir}</directory>
+                            <directory>${project.basedir}/src</directory>
                             <includes>
-                                <include>src/**/*.groovy</include>
+                                <include>**/*.groovy</include>
                             </includes>
                         </source>
                         <source>
@@ -144,12 +217,13 @@
                         </source-->
                     </sources>
                     <testSources>
-                        <source>
+                        <testSource>
                             <directory>${project.basedir}/test</directory>
                             <includes>
                                 <include>**/*.groovy</include>
+                                <include>**/*.java</include>
                             </includes>
-                        </source>
+                        </testSource>
                     </testSources>
                 </configuration>
             </plugin>
