@@ -24,11 +24,11 @@ This readme contains mostly technical information, if you need some overview - p
 
 * [Grid Dynamics Blog](https://blog.griddynamics.com/developing-a-modular-pipeline-library-to-improve-devops-collaboration/)
 * Overview & demo videos:
-  * [MPL Intro](https://youtu.be/NpnQS3fFlyI)
-  * [MPL Overview](https://youtu.be/wwi7oREL02k)
-  * [Demo of the MPL Build](https://youtu.be/QZsQThhPk-Y)
-  * [Demo of the Nested Library](https://youtu.be/UsThHFze76Y)
-  * [Demo of the Petclinic Pipeline](https://youtu.be/GLtvxY1S3Aw)
+  * [MPL Introduction](https://youtu.be/02zCNJ20AC0)
+  * [MPL Overview](https://youtu.be/CXghkwmsoXY)
+  * [Demo of the MPL Build](https://youtu.be/knXX18E-W_s)
+  * [Demo of the Nested Library](https://youtu.be/D72vnIBxQYE)
+  * [Demo of the Petclinic Pipeline](https://youtu.be/Gq8RYlZjds0)
 
 You also can check [MPL Wiki](https://github.com/griddynamics/mpl/wiki) to find additional info.
 
