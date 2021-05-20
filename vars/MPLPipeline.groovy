@@ -31,7 +31,7 @@ def call(body) {
   def MPL = MPLPipelineConfig(body, [
     agent_label: '',
     modules: [
-      Checkout: [:],
+      Checkout: [DEFAULT_WD:'/home'],
       Build: [:],
       Deploy: [:],
       Test: [:]
