@@ -1,1 +1,8 @@
 /target
+.idea
+.settings
+.circleci
+mpl.iml
+.factorypath
+.gradle/**
+build/**

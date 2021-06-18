@@ -24,6 +24,8 @@
 import org.junit.Before
 import org.junit.Test
 
+import java.nio.file.Paths
+
 import static com.lesfurets.jenkins.unit.global.lib.LibraryConfiguration.library
 import static com.lesfurets.jenkins.unit.global.lib.LocalSource.localSource
 
@@ -39,6 +41,8 @@ class BuildTest extends MPLTestBase {
   @Before
   void setUp() throws Exception {
     String sharedLibs = this.class.getResource('.').getFile()
+
+    println("sharedLibs: ${sharedLibs}")
 
     helper.registerSharedLibrary(library()
         .name('mpl')
