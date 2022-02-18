@@ -87,8 +87,16 @@ abstract class Helper {
     def modules = []
     def libs = new FilePath(executable.getRootDir()).child('libs')
     action.getLibraries().each { lib ->
+      def libDir
+      // TODO: backward compatibility SECURITY-2422, should be removed in future to use only "getDirectoryName() method"
+      // https://github.com/jenkinsci/workflow-cps-global-lib-plugin/commit/ace0de3c2d691662021ea10306eeb407da6b6365
+      try {
+        libDir = lib.getDirectoryName()
+      } catch(NoSuchMethodError) {
+        libDir = lib.name
+      }
       MPLManager.instance.getModulesLoadPaths().each { modulesPath ->
-        def libPath = Paths.get(lib.name, 'resources', modulesPath, path).toString()
+        def libPath = Paths.get(libDir, 'resources', modulesPath, path).toString()
         def f = libs.child(libPath)
         if( f.exists() ) modules += [[libPath, f.readToString()]]
       }
