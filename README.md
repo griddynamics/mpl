@@ -44,7 +44,7 @@ You also can check [MPL Wiki](https://github.com/griddynamics/mpl/wiki) to find 
 Go to: Manage Jenkins --> Configure System --> Global Pipeline Libraries:
 
 * Name: `mpl`
-  * Default Version: `<empty>`
+  * Default Version: `master`
   * Load implicitly: `false`
   * Allow default version to be overridden: `true`
   * Include @Library changes in job recent changes: `true`
