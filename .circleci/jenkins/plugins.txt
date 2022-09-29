@@ -1,0 +1,10 @@
+ansicolor
+build-timeout
+git
+jobConfigHistory
+timestamper
+workflow-aggregator
+configuration-as-code
+configuration-as-code-groovy
+matrix-auth
+audit-trail

@@ -87,25 +87,19 @@ jobs:
     steps:
       - checkout
 
-      - run:
-          name: Get the jenkinsBro repo
-          command: git clone https://github.com/rabits/jenkinsbro ~/jenkinsbro
-
       - setup_remote_docker
           # CircleCI cache now not free
           # docker_layer_caching: true
 
       - run:
           name: Build jenkins image
-          command: ~/jenkinsbro/jenkinsbro_build.sh "<< parameters.jenkins_version >>"
+          command: docker build -t jenkinsbro --build-arg "JENKINS_VERSION=$(.circleci/get_jenkins_version.sh << parameters.jenkins_version >>)" .circleci/jenkins
           no_output_timeout: 5m
 
       - run:
-          name: Copy jenkinsbro configuration and tests
+          name: Create jenkins_home container to store data
           command: | # CircleCI using remote docker server - so we can't just mount the folder...
             docker create -v /var/jenkins_home --name jenkins-home alpine /bin/true
-            docker cp .circleci/jenkinsbro/config jenkins-home:/var/jenkins_home
-            docker cp .circleci/jenkinsbro/jenkinsBro jenkins-home:/var/jenkins_home
             docker run --rm -it --volumes-from jenkins-home alpine chown -R 1000:1000 /var/jenkins_home
 
       - run:
@@ -114,7 +108,8 @@ jobs:
             docker run -e "MPL_VERSION=$(echo "${CIRCLE_BRANCH}" | sed 's|\(pull/[0-9]*\)|\1/merged|g')"
             -e "MPL_REFSPEC=$(echo "${CIRCLE_BRANCH}:remotes/origin/${CIRCLE_BRANCH}" | sed -e '/^pull/! s|\(.*\)|heads/\1|' -e 's|\(pull/[0-9]*\)|\1/merged|g')"
             -e "MPL_CLONE_URL=$(echo "${CIRCLE_REPOSITORY_URL}" | sed 's|git@github.com:|https://github.com/|')"
-            --name jenkins --rm -it --volumes-from jenkins-home jenkinsbro-master
+            -e "HTTP_PORT=8085"
+            --name jenkins --rm -it --volumes-from jenkins-home jenkinsbro
           no_output_timeout: 5m
 
       - run:
@@ -122,7 +117,7 @@ jobs:
           when: always
           command: |
             mkdir -p results/artifacts results/reports
-            docker cp jenkins-home:/var/jenkins_home/jenkinsBro/junit_report results/reports/junit
+            docker cp jenkins-home:/var/jenkins_home/junit_report results/reports/junit
             docker rm jenkins-home
 
       - store_test_results:
