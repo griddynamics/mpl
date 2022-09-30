@@ -1,0 +1,118 @@
+---
+# Jenkins server configuration
+
+jenkins:
+  systemMessage: Jenkins Environment
+
+  numExecutors: 1  # Should be 0 on prod envs
+
+  agentProtocols:
+    - JNLP4-connect
+    - Ping
+
+  # Proxy compatibility if using nginx
+  #crumbIssuer:
+  #  standard:
+  #    excludeClientIPGromCrumb: true
+
+  # Restricting agents in actions
+  remotingSecurity:
+    enabled: true
+
+  # Set local access restrictions
+  disableRememberMe: true
+
+#  securityRealm:
+#    local:
+#      allowsSignup: false
+#      users:
+#        # There could be only one
+#        - id: admin
+#          password: admin
+#        # To test the prod user access
+#        - id: user
+#          password: user
+#
+#  authorizationStrategy:
+#    globalMatrix:
+#      permissions:
+#        # In case needed to change the configs and see them in CASC export view
+#        - EITHER:Overall/Administer:admin
+#
+#        # Read only access for the user
+#        - EITHER:Agent/ExtendedRead:authenticated
+#        - EITHER:Credentials/View:authenticated
+#        - EITHER:Job/Build:authenticated
+#        - EITHER:Job/Cancel:authenticated
+#        - EITHER:Job/Configure:authenticated
+#        - EITHER:Job/Create:authenticated
+#        - EITHER:Job/Delete:authenticated
+#        - EITHER:Job/Move:authenticated
+#        - EITHER:Job/Read:authenticated
+#        - EITHER:Overall/Read:authenticated
+#        - EITHER:Overall/SystemRead:authenticated
+#        - EITHER:Run/Delete:authenticated
+#        - EITHER:Run/Update:authenticated
+#        - EITHER:View/Configure:authenticated
+#        - EITHER:View/Create:authenticated
+#        - EITHER:View/Delete:authenticated
+#        - EITHER:View/Read:authenticated
+
+unclassified:
+  location:
+    adminAddress: admin@localhost
+    url: http://${JENKINS_HOSTNAME}:${HTTP_PORT}/  # Actually better to use https
+
+  audit-trail:
+    logBuildCause: true
+    pattern: ".*/(?:configSubmit|doDelete|postBuildResult|enable|disable|cancelQueue|stop|toggleLogKeep|doWipeOutWorkspace|createItem|createView|toggleOffline|cancelQuietDown|quietDown|restart|exit|safeExit)/?.*"
+    loggers:
+      - logFile:
+          count: 30
+          limit: 1000
+          log: /var/jenkins_home/logs/audit.log
+          logSeparator: " "
+
+  globalLibraries:
+    libraries:
+      - name: mpl
+        defaultVersion: ${MPL_VERSION}
+        retriever:
+          modernSCM:
+            scm:
+              git:
+                remote: ${MPL_CLONE_URL}
+                traits:
+                  - cloneOptionTrait:
+                      extension:
+                        honorRefspec: true
+                        noTags: false
+                        reference: ${MPL_REFSPEC}
+                        shallow: false
+
+tool:
+  git:
+    installations:
+      - name: Environment git client
+        home: git
+  maven:
+    installations:
+      - name: Maven 3
+        properties:
+          - installSource:
+              installers:
+                - maven:
+                    id: '3.6.3'
+
+
+# Run script with tests
+groovy:
+  - script: |
+      import jenkins.model.Jenkins
+
+      println('Running JenkinsBro test framework...')
+
+      GroovyShell shell = new GroovyShell(Jenkins.instance.getPluginManager().uberClassLoader, binding)
+      shell.evaluate(new File('/usr/local/jenkins-tests/tests.groovy'))
+
+      println('JenkinsBro test framework is running...')
