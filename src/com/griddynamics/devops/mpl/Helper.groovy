@@ -181,7 +181,12 @@ abstract class Helper {
    */
   @NonCPS
   static String pathToSimpleName(String path) {
-    return path.tokenize('./')[-3,-2].join('/')
+    def p = new File(path)
+    def fname = p.getName().toString()
+    if( p.getParentFile() ) {
+      return [p.getParentFile().getName(), fname.take(fname.lastIndexOf('.'))].join('/')
+    }
+    return fname.take(fname.lastIndexOf('.'))
   }
 
   /**
