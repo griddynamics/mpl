@@ -1,4 +1,6 @@
-Modular Pipeline Library
+<h1 <p align="center"> <a href="https://www.griddynamics.com/blog/developing-a-modular-pipeline-library" target="_blank"> Modular Pipeline Library </a> 
+</p>
+</h1>
 ========================
 
 [![CircleCI](https://circleci.com/gh/griddynamics/mpl/tree/master.svg?style=shield)](https://app.circleci.com/pipelines/github/griddynamics/mpl?branch=master) [![Gitter](https://badges.gitter.im/modular-pipeline-library/community.svg)](https://gitter.im/modular-pipeline-library/community)
