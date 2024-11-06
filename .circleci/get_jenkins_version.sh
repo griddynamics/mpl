@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Script to find of the lts/latest versions of jenkins
+# Script to find of the lts/latest docker image version of jenkins
 #
 # Usage:
 #   $ ./jenkinsbro_build.sh <VERSION>
@@ -29,7 +29,8 @@ elif [ "${VAR_VERSION}" != 'latest' ]; then
     echo "Using specified version '${ver}'" 1>&2
 fi
 
-jenkins_version=$(curl -s "${ver_url}/" | grep -oE 'href="'${ver}'[^/]*' | head -1 | tr -dc '0-9.')
+# Get version-1 to not complicate the dockerhub checks - sometimes images are not here for the fresh versions
+jenkins_version=$(curl -s "${ver_url}/" | grep -oE 'href="'${ver}'[^/]*' | head -2 | tail -1 | tr -dc "0-9.\n")
 if [ "x$jenkins_version" = "x" ]; then
     echo "Unable to find version for: ${VAR_VERSION} '${jenkins_version}'" 1>&2
     exit 1
