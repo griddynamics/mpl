@@ -6,10 +6,6 @@ jenkins:
 
   numExecutors: 1  # Should be 0 on prod envs
 
-  agentProtocols:
-    - JNLP4-connect
-    - Ping
-
   # Proxy compatibility if using nginx
   #crumbIssuer:
   #  standard:
