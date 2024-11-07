@@ -6,6 +6,8 @@ workflows:
       - build
       - jenkins_test:
           jenkins_version: lts
+      - jenkins_test:
+          jenkins_version: latest
 
   nightly_jenkins_test:
     triggers:
